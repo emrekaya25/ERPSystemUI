@@ -1,0 +1,427 @@
+﻿@using ERPSystemUI.Model.Model
+@model ProductViewModel
+@{
+    ViewData["Title"] = "Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/product.js"></script>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Ürünler</h3>
+        <div class="card-tools col-2">
+            <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#modal-NewProduct">Ekle</button>
+        </div>
+        <div class="card-tools col-2">
+            <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#modal-Categories">Kategoriler</button>
+        </div>
+    </div>
+    <div class="card-body">
+            <!-- table start -->
+            <div class="row mb-2">
+                <div class="col-4">
+                <select class="form-control" id="items-per-page">
+                        <option value="5">Her sayfada 5 ürün göster.</option>
+                    <option selected value="10">Her sayfada 10 ürün göster.</option>
+                    <option value="25">Her sayfada 25 ürün göster.</option>
+                    <option value="50">Her sayfada 50 ürün göster.</option>
+                    </select>
+                </div>
+                <div class="col-8"> <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" /></div>
+            </div>
+            <table id="my-table" class="table  table-striped table-borderless shadow">
+                <!-- thead start -->
+                <thead>
+                    <tr class="text-center fs-6 border-bottom">
+                        <th style="width: 10px; text-align:start;">Resim</th>
+                        <th style="text-align:start;">Ürün Adı</th>
+                        <th style="text-align:start;">Kategorisi</th>
+                        <th style="text-align:start;">Markası</th>
+                        <th style="text-align:start;">Açıklama</th>
+                        <th style="text-align:start;">Güncelle</th>
+                        <th style="text-align:start;">Sil</th>
+                    </tr>
+                </thead>
+                <!-- thead end -->
+                <!-- tbody start -->
+                <tbody>
+                    @{
+                        int count = 0;
+                    }
+                    @foreach (var item in Model.Products)
+                    {
+                        count++;
+                        <tr class="border-bottom">
+                            <td class="align-content-center"><img class="card-img-top" style="max-width:100px" src="data:image/jpeg;base64,@item.Image" alt="@item.Name"></td>
+                            <td class="align-content-center">@item.Name</td>
+                            <td class="align-content-center">@item.CategoryName</td>
+                            <td class="align-content-center">@item.BrandName</td>
+                            <td class="align-content-center">@item.Description</td>
+                            <td class="align-content-center">
+                                <button id="btnUpdateProduct"
+                                        onclick='openProductDetailModal("@item.Id","@item.Name","@item.CategoryId","@item.BrandName","@item.Description","@item.Image")' class="btn bg-gradient-cyan">
+                                    Güncelle
+                                </button>
+                            </td>
+                            @using (Html.BeginForm("DeleteProduct", "Product", FormMethod.Post, new { id = "deleteProductForm" }))
+                            {
+
+                                <td class="align-content-center"><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteProduct" type="submit" class="btn btn-danger">Sil</button></td>
+                            }
+
+                        </tr>
+
+                    }
+                </tbody>
+                <!-- tbody end -->
+                <!-- tfoot start -->
+                <tfoot>
+                    <tr>
+                        <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> Ürün</td>
+                        <td class="text-end border-0" colspan="4">
+                            <nav class="d-flex justify-content-end">
+                                <ul class="pagination fw-bold">
+                                    <li class="page-item">
+                                        <button id="first-page" class="page-link text-black">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button id="prev-page" class="page-link text-black">
+                                            <span aria-hidden="true">&lsaquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+                                    <li>
+                                        <button id="next-page" class="page-link text-black">
+                                            <span aria-hidden="true">&rsaquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <button id="last-page" class="page-link text-black">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </td>
+                    </tr>
+                </tfoot>
+                <!-- tfoot end -->
+            </table>
+            <!-- table end -->
+        </div>
+
+
+</div>
+
+<div class="modal" id="modal-Categories">
+    <div class="modal-dialog  modal-dialog-scrollable modal-NewProduct">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Kategoriler</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <table class="table table-striped">
+
+                    <thead>
+                    <th>Kategori Adı</th>
+                    <th class="d-flex justify-content-end">
+                        <button type="button" onclick="closeModal()" class="btn btn-success" data-toggle="modal" data-target="#secondaryModal">
+                            Kategori Ekle
+                        </button>
+                    </th>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Categories)
+                        {
+                            <tr>
+                                <td class="align-content-center">
+                                    @item.Name
+                                </td>
+                                <td class="d-flex justify-content-end">
+                                    <button id="btnUpdateCategory" onclick='openCategoryDetailModal("@item.Id","@item.Name")' class="btn bg-gradient-cyan m-3">Güncelle</button>
+                                    @using (Html.BeginForm("DeleteCategory", "Product", FormMethod.Post, new { id = "deleteCategoryForm" }))
+                                    {
+
+                                    <td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteCategory" type="submit" class="btn btn-danger m-3">Sil</button></td>
+                                    }
+
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+
+
+                </table>
+
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="modal-NewProduct">
+    <div class="modal-dialog modal-NewProduct">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Yeni Ürün</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddProduct", "Product", FormMethod.Post, new { id = "addProductForm", enctype = "multipart/form-data" }))
+                {
+                    <div class="modal-body">
+
+
+                        <div class="form-group">
+                            <label for="txtProductName_Add">Ürün Adı</label>
+                            <input name="Name" type="text" class="form-control" id="txtProductName_Add">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtProductName_Add">Marka Adı</label>
+                            <input name="BrandName" type="text" class="form-control" id="txtProductBrandName_Add">
+                            <div class="invalid-feedback">Marka Adı alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtProductDescription_Add">Ürün Açıklaması</label>
+                            <textarea style="min-height:85px; max-height:85px;" name="Description" class="form-control" rows="5" id="txtProductDescription_Add"></textarea>
+                            <div class="invalid-feedback">Açıklama alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtImageProduct_Add">Fotoğraf</label>
+                            <input name="imageProductFile" type="file" class="form-control" rows="5" id="txtImageProduct_Add" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ddlProductCategory_Add">Kategorisi</label>
+                            <select name="CategoryId" class="custom-select rounded-0" id="ddlProductCategory_Add">
+                            <option value=""> Kategori Seçiniz...</option>
+                                @{
+                                    for (int i = 0; i < Model.Categories.Count; i++)
+                                    {
+                                        <option value="@Model.Categories[i].Id">@Model.Categories[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                            <div class="invalid-feedback">Kategori alanı boş bırakılamaz.</div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddProduct">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@functions {
+    string DecodeHtmlCharacters(string htmlEncodedString)
+    {
+        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+    }
+}
+@if (TempData["responseProduct"] != null)
+{
+    var x = TempData["responseProduct"].ToString();
+    <script>
+        Swal.fire({
+            title: "Başarılı!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "success"
+        });
+    </script>
+}
+@if (TempData["errorProduct"] != null)
+{
+    var x = TempData["errorProduct"].ToString();
+    <script>
+        Swal.fire({
+            title: "Hata!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "error"
+        });
+    </script>
+}
+
+<!-- #endregion -->
+
+
+
+
+<div class="modal fade" id="modal-ProductDetail">
+    <div class="modal-dialog modal-ProductDetail">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ürün Güncelle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("UpdateProduct", "Product", FormMethod.Post, new { id = "btnUpdateProduct", enctype = "multipart/form-data" }))
+                {
+                    <div class="modal-body">
+
+                        <input name="Id" hidden="hidden" type="text" class="form-control" id="txtProductId_Update">
+                        <div class="form-group">
+                            <label for="txtProductName_Update">Ürün Adı</label>
+                            <input name="Name" type="text" class="form-control" id="txtProductName_Update">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtProductBrandName_Update">Marka Adı</label>
+                            <input name="BrandName" type="text" class="form-control" id="txtProductBrandName_Update">
+                            <div class="invalid-feedback">Marka adı alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtProductDescription_Update">Ürün Açıklaması</label>
+                            <textarea name="Description" class="form-control" rows="5" id="txtProductDescription_Update"></textarea>
+                            <div class="invalid-feedback">Açıklama alanı boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtImageProduct_Update">Fotoğraf</label>
+                            <input name="imageProductFile" type="file" class="form-control" rows="5" id="txtImageProduct_Update" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ddlProductCategory_Update">Kategorisi</label>
+                            <select name="CategoryId" class="custom-select rounded-0" id="ddlProductCategory_Update">
+                            <option value=""> Kategori Seçiniz...</option>
+                                @{
+                                    for (int i = 0; i < Model.Categories.Count; i++)
+                                    {
+                                        <option value="@Model.Categories[i].Id">@Model.Categories[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                            <div class="invalid-feedback">Kategori alanı boş bırakılamaz.</div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateProductDen">Güncelle</button>
+                    </div>
+                }
+            }
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<input hidden="hidden" id="deleteProduct" name="id" />
+
+
+
+<!-- Modal -->
+@{
+    @using (Html.BeginForm("AddCategory", "Product", FormMethod.Post))
+    {
+
+        <div class="modal" id="secondaryModal" tabindex="-1" aria-labelledby="secondaryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="secondaryModalLabel">Kategori Ekle</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+
+                    <div class="modal-body">
+
+
+                        <label for="txtCategoryName_Add">Kategori Adı</label>
+                        <input name="Name" type="text" class="form-control" id="txtCategoryName_Add" placeholder="Kategori Adı...">
+                        <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                        <button type="submit" id="btnAddCategory" class="btn btn-success">Kaydet</button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    }
+
+}
+
+@{
+    @using (Html.BeginForm("UpdateCategory", "Product", FormMethod.Post, new { id = "btnUpdateCategory" }))
+    {
+
+        <div class="modal" id="secondaryUpdateCategoryModal" tabindex="-1" aria-labelledby="secondaryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="secondaryModalLabel">Kategori Güncelle</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+
+                    <div class="modal-body">
+
+                        <input name="Id" hidden="hidden" type="text" class="form-control" id="txtCategoryId_Update">
+                        <label for="txtCategoryName_Update">Kategori Adı</label>
+                        <input name="Name" type="text" class="form-control" id="txtCategoryName_Update">
+                        <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                        <button type="submit" id="btnUpdateCategoryDen" class="btn btn-success">Kaydet</button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    }
+
+}

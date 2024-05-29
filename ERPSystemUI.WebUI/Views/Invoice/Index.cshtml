@@ -1,0 +1,321 @@
+﻿@using ERPSystemUI.Model.Model
+@model InvoiceViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Invoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/invoice.js"></script>
+@functions {
+    string DecodeHtmlCharacters(string htmlEncodedString)
+    {
+        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+    }
+}
+@if (TempData["responseInvoice"] != null)
+{
+    var x = TempData["responseInvoice"].ToString();
+    <script>
+        $(document).ready(function () {
+            Swal.fire({
+                title: "Başarılı!",
+                html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+                icon: "success"
+            });
+        });
+    </script>
+}
+else if (TempData["errorInvoicess"] != null)
+{
+    var x = TempData["errorInvoicess"].ToString();
+    <script>
+        $(document).ready(function () {
+            Swal.fire({
+                title: "Hata!",
+                html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+                icon: "error"
+            });
+        });
+    </script>
+}
+
+<style>
+
+    .tagbox {
+        display: inline-block;
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        padding-block: auto;
+    }
+
+</style>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Fatura</h3>
+        <div class="card-tools col-2">
+            <button type="button" class="btn btn-block btn-success" onclick="firstModal()">Ekle</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- table start -->
+        <div class="row mb-2">
+            <div class="col-4">
+                <select class="form-control" id="items-per-page">
+                    <option value="5">Her sayfada 5 fatura göster.</option>
+                    <option selected value="10">Her sayfada 10 fatura göster.</option>
+                    <option value="25">Her sayfada 25 fatura göster.</option>
+                    <option value="50">Her sayfada 50 fatura göster.</option>
+                </select>
+            </div>
+            <div class="col-8"> <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" /></div>
+        </div>
+        <table id="my-table" class="table  table-striped table-borderless shadow">
+            <!-- thead start -->
+            <thead>
+
+                <tr class="fs-6 border-bottom">
+                    <th style="text-align:start;">Fatura Tarihi</th>
+                    <th style="text-align:start;">Alıcı Şirket</th>
+                    <th style="text-align:start;">Alıcı<br /> Telefon</th>
+                    <th style="text-align:start;">Alıcı<br /> Mail</th>
+                    <th style="text-align:start;">Gönderen Şirket Şirket</th>
+                    <th style="text-align:start;">Gönderen Şirket<br /> Mail</th>
+                    <th style="text-align:start;">Gönderen Şirket Telefon</th>
+                    <th style="text-align:start;">Gönderen Şirket Adres</th>
+                    <th style="text-align:start;">Fatura Detayı</th>
+
+                </tr>
+            </thead>
+            <!-- thead end -->
+            <!-- tbody start -->
+            <tbody>
+                @{
+                    int count = 0;
+
+                }
+                @foreach (var item in Model.Invoices)
+                {
+                    count++;
+                    <tr class="border-bottom">
+                        <td class="align-content-center">@item.InvoiceDate.Value.ToShortDateString()</td>
+                        <td class="align-content-center">@item.CompanyName</td>
+                        <td class="align-content-center">@item.CompanyPhone</td>
+                        <td class="align-content-center">@item.CompanyMail</td>
+                        <td class="align-content-center">@item.SupplierName</td>
+                        <td class="align-content-center">@item.SupplierMail</td>
+                        <td class="align-content-center">@item.SupplierPhone</td>
+                        <td class="align-content-center">@item.SupplierAddress</td>
+                        <td class="align-content-center">
+
+                            @using (Html.BeginForm("GetInvoiceDetail", "Invoice", FormMethod.Post, new { id = "invoiceDetail" }))
+                            {
+                                <input name="Id" hidden="hidden" value="@item.Id" />
+                                <button type="submit" class="btn btn-success">Detay</button>
+                            }
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+            <!-- tbody end -->
+            <!-- tfoot start -->
+            <tfoot>
+                <tr>
+                    <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> Fatura</td>
+                    <td class="text-end border-0" colspan="6">
+                        <nav class="d-flex justify-content-end">
+                            <ul class="pagination fw-bold">
+                                <li class="page-item">
+                                    <button id="first-page" class="page-link text-black">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button id="prev-page" class="page-link text-black">
+                                        <span aria-hidden="true">&lsaquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+                                <li>
+                                    <button id="next-page" class="page-link text-black">
+                                        <span aria-hidden="true">&rsaquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item">
+                                    <button id="last-page" class="page-link text-black">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </td>
+                </tr>
+            </tfoot>
+            <!-- tfoot end -->
+        </table>
+        <!-- table end -->
+    </div>
+
+
+</div>
+
+@{
+    using (Html.BeginForm("AddInvoice", "Invoice", FormMethod.Post, new { id = "addInvoiceForm", enctype = "multipart/form-data" }))
+    {
+        <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Fatura Girişi</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <input hidden="hidden" id="txtCompanyId" name="CompanyId" value="@Convert.ToInt64(Accessor.HttpContext.Session.GetString("CompanyId"))" />
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtCompanyName_Add">Fatura No:</label>
+                                        <input name="InvoiceNo" placeholder="Fatura no.." type="text" class="form-control" id="txtInvoiceNo_Add">
+                                        <div class="invalid-feedback">Fatura no alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtCompanyName_Add">Alıcı Şirket</label>
+                                        <input name="CompanyName" placeholder="@Accessor.HttpContext.Session.GetString("Company")..." type="text" class="form-control" id="txtCompanyName_Add">
+                                        <div class="invalid-feedback">Alıcı şirket ad alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtCompanyName_Add">Alıcı Şirket Telefon</label>
+                                        <input name="CompanyPhone" placeholder="Alıcı Şirket Telefon..." type="text" class="form-control" id="txtCompanyNo_Add">
+                                        <div class="invalid-feedback">Alıcı şirket telefon numarası alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtCompanyName_Add">Alıcı Şirket Email</label>
+                                        <input name="CompanyMail" placeholder="Alıcı Şirket Email..." type="text" class="form-control" id="txtCompanyMail_Add">
+                                        <div class="invalid-feedback">Alıcı şirket e-posta alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtSupplierName_Add">Gönderici Şirket</label>
+                                        <input name="SupplierName" placeholder="Gönderen Şirket..." type="text" class="form-control" id="txtSupplierName_Add">
+                                        <div class="invalid-feedback">Gönderici şirket ad alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtSupplierName_Add">Gönderici Şirket Mail</label>
+                                        <input name="SupplierMail" placeholder="Gönderen Şirket..." type="text" class="form-control" id="txtSupplierMail_Add">
+                                        <div class="invalid-feedback">Gönderici şirket e-posta alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtSupplierPhone_Add">Gönderici Telefon Numarası</label>
+                                        <input name="SupplierPhone" placeholder="Gönderici Telefon Numarası..." type="text" class="form-control" id="txtSupplierPhone_Add">
+                                        <div class="invalid-feedback">Gönderici şirket telefon numarası alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtInvoiceDate_Add">Fatura Tarihi</label>
+                                        <input name="InvoiceDate" type="datetime-local" class="form-control" id="txtInvoiceDate_Add">
+                                        <div class="invalid-feedback">Fatura tarih alanı boş bırakılamaz.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtSupplierAddress_Add">Gönderen Şirket Adres</label>
+                                <textarea name="SupplierAddress" style="min-height:100px; max-height:100px;" placeholder="Gönderen Şirket Adresi..." type="text" class="form-control" id="txtSupplierAddress_Add"></textarea>
+                                <div class="invalid-feedback">Gönderen şirket adres alanı boş bırakılamaz.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="secondModalShow()">Detay ekle</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="secondModal" tabindex="-1" aria-labelledby="secondModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="secondModalLabel">Fatura Detay</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+                        <div class="deneme">
+                            <div class="row denemelerde">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="txtProductName_Add">Ürün İsmi</label>
+                                        <input name="ProductName" placeholder="Ürün İsmi..." type="text" class="form-control" id="txtProductName_Add">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="txtProductDescription_Add">Ürün Açıklaması</label>
+                                        <input name="ProductDescription" placeholder="Ürün Açıklaması..." type="text" class="form-control" id="txtProductDescription_Add">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="txtQuantity_Add">Miktar</label>
+                                        <input name="Quantity" placeholder="Miktar..." type="number" min="0" class="form-control" id="txtQuantity_Add">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="txtUnitPrice_Add">Birim Fiyatı</label>
+                                        <input name="UnitPrice" placeholder="Birim Fiyatı..." type="number" min="0" class="form-control" id="txtUnitPrice_Add">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary"  onclick='addInvoiceDetail()'>Ekle</button>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-9" id="invoiceTagBox">
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="firstModal()">Geri</button>
+                        <button type="button" id="btnFaturaAdd" class="btn btn-primary">Kaydet</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

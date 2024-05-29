@@ -1,0 +1,313 @@
+﻿@using ERPSystemUI.Model.DTO.Login
+@using ERPSystemUI.WebUI.SessionHelper
+@{
+    @inject IHttpContextAccessor Accessor
+
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ERP System</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../Admin/plugins/fontawesome-free/css/all.min.css">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="../Admin/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../Admin/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="../Admin/plugins/jquery/jquery.min.js"></script>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+    <!-- Site wrapper -->
+    <div b-5110b5n92p class="wrapper">
+        <!-- Navbar -->
+        <nav b-5110b5n92p class="main-header navbar navbar-expand shadow" style="background-color:seagreen; color:white !important;">
+            <!-- Left navbar links -->
+            <div class="col col-6">
+                <ul b-5110b5n92p class="navbar-nav">
+
+                    <li b-5110b5n92p class="nav-item">
+                        <a b-5110b5n92p class="nav-link text-light" data-widget="pushmenu" href="#" role="button"><i b-5110b5n92p class="fas fa-bars"></i></a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="d-flex col col-6 justify-content-end">
+                <ul b-5110b5n92p class="navbar-nav">
+                    @using (Html.BeginForm("ProfilePage", "User", FormMethod.Post, new { id = "getUserDetailLayout", style = "display: inline-block;" }))
+                    {
+                        <li b-5110b5n92p class="nav-item d-none d-sm-inline-block">
+                            <input hidden="hidden" name="Id" value="@Convert.ToInt64(Accessor.HttpContext.Session.GetString("UserId"))" />
+                            <button style="border:none;background:none; font-weight:bolder;" type="submit" class="nav-link text-light shadow">Profil</button>
+                        </li>
+                    }
+
+                    @using (Html.BeginForm("Logout", "Login", FormMethod.Post, new { id = "Logout", style = "display: inline-block;" }))
+                    {
+
+                        <li b-5110b5n92p class="nav-item d-none d-sm-inline-block">
+                            <button style="border:none;background:none; font-weight:bolder;" type="submit" class="nav-link text-light shadow">Çıkış Yap</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside style="background-color:seagreen;" b-5110b5n92p class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            @*             <a b-5110b5n92p href="/Anasayfa" class="brand-link">
+            <span b-5110b5n92p class="brand-text font-weight-light">ERPSystem</span>
+            </a> *@
+
+            <!-- Sidebar -->
+            <div b-5110b5n92p class="sidebar">
+                <!-- Sidebar user (optional) -->
+                <div b-5110b5n92p class="user-panel mt-1 pb-1 pt-1 mb-1 d-flex">
+                    <div b-5110b5n92p class="info">
+
+                        <a type="button" class="d-block" href="/Anasayfa" style="background:none; border:none; color:white;">
+                                <span>
+                                    <img class="img-circle" src="data:image/jpeg;base64,@Accessor.HttpContext.Session.GetString("UserImage")" alt="User Avatar">
+                                </span><span style="text-transform:uppercase;">@Accessor.HttpContext.Session.GetString("Name")</span>
+                            </a>
+                    </div>
+                </div>
+
+                <!-- SidebarSearch Form -->
+                <div b-5110b5n92p class="form-inline pt-1">
+                    <div b-5110b5n92p class="input-group" data-widget="sidebar-search">
+                        <input b-5110b5n92p style="background-color:whitesmoke; color:black;" class="form-control form-control-sidebar" type="search" placeholder="Ara..." aria-label="Search">
+                        <div b-5110b5n92p class="input-group-append">
+                            <button b-5110b5n92p style="background-color:whitesmoke;color:seagreen;" class="btn btn-sidebar">
+                                <i b-5110b5n92p class="fas fa-search fa-fw"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <nav b-5110b5n92p class="mt-2">
+                    <ul b-5110b5n92p class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+                             with font-awesome or any other icon font library -->
+
+                        <li b-5110b5n92p class="nav-item">
+                            <a b-5110b5n92p href="/Anasayfa" class="nav-link">
+                                <i class="nav-icon fas fa-coffee"></i>
+                                <p b-5110b5n92p>
+                                    Anasayfa
+                                </p>
+                            </a>
+                        </li>
+
+                        <li b-5110b5n92p class="nav-item">
+                            <a b-5110b5n92p href="/Requests" class="nav-link">
+                                <i b-5110b5n92p class="nav-icon fas fa-check"></i>
+                                <p b-5110b5n92p>
+                                    İstek
+                                </p>
+                            </a>
+                        </li>
+                        @if (SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür"))
+                        {
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Companies" class="nav-link">
+                                    <i b-5110b5n92p class="nav-icon fas fa-building"></i>
+                                    <p b-5110b5n92p>
+                                        Şirket
+                                    </p>
+                                </a>
+                            </li>
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Products" class="nav-link">
+                                    <i class="nav-icon fa fa-shopping-cart"></i>
+                                    <p b-5110b5n92p>
+                                        Ürün
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Offers" class="nav-link">
+                                    <i b-5110b5n92p class="nav-icon fa fa-gavel"></i>
+                                    <p b-5110b5n92p>
+                                        Teklif
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Users" class="nav-link">
+                                    <i b-5110b5n92p class="nav-icon far fa-user"></i>
+                                    <p b-5110b5n92p>
+                                        Kullanıcı
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Stocks" class="nav-link">
+                                    <i b-5110b5n92p class="nav-icon fas fa-warehouse"></i>
+                                    <p b-5110b5n92p>
+                                        Stok
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Invoices" class="nav-link">
+                                    <i b-5110b5n92p class="nav-icon fas fa-file-invoice"></i>
+                                    <p b-5110b5n92p>
+                                        Fatura
+                                    </p>
+                                </a>
+                            </li>
+                            <li b-5110b5n92p class="nav-item">
+                                <a b-5110b5n92p href="/Rapor" class="nav-link">
+                                    <i class="nav-icon fas fa-scroll"></i>
+                                    <p b-5110b5n92p>
+                                        Rapor
+                                    </p>
+                                </a>
+                            </li>
+                        }
+
+
+
+
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div b-5110b5n92p class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section b-5110b5n92p class="content-header">
+                <div b-5110b5n92p class="container-fluid">
+                    <div b-5110b5n92p class="row mb-2">
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+            @functions {
+                string DecodeHtmlCharacters(string htmlEncodedString)
+                {
+                    return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+                }
+            }
+            <!-- Main content -->
+            <section b-5110b5n92p class="content">
+
+                @RenderBody()
+                @RenderSection("scripts", required: false)
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        @*         <footer b-5110b5n92p class="main-footer">
+        <div b-5110b5n92p class="float-right d-none d-sm-block">
+        <b b-5110b5n92p>Version</b> 3.2.0
+        </div>
+        <strong b-5110b5n92p>Copyright &copy; 2014-2021 <a b-5110b5n92p href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+        </footer> *@
+
+        <!-- Control Sidebar -->
+        <aside b-5110b5n92p class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <style>
+        .asd {
+            background-color: darkslategray;
+            color: white !important;
+        }
+
+        .bg-primary {
+            background-color: seagreen !important;
+            color: white !important;
+        }
+
+        .btn-primary {
+            background-color: lightseagreen;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background-color: lightseagreen;
+                transform: scale(1.1);
+            }
+
+            .btn-primary:focus {
+                background-color: lightseagreen !important;
+                transform: scale(1.1);
+            }
+
+        .page-link {
+            background-color: seagreen !important;
+            color: white !important;
+        }
+    </style>
+    <script>
+        const buttons = document.querySelectorAll('button');
+
+        // Her buton için döngü
+        buttons.forEach(button => {
+            // Eğer butonun metni 'sil' ise
+            if (button.textContent === 'Sil') {
+                // Butonun metnini değiştir ve ikon ekle
+                button.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the current URL path
+            var currentPath = window.location.pathname;
+
+            // Get all nav links
+            var navLinks = document.querySelectorAll('.nav-link');
+
+            // Loop through each nav link
+            navLinks.forEach(function (link) {
+                // Get the href attribute of the link
+                var href = link.getAttribute('href');
+
+                // Check if the href matches the current path
+                if (currentPath === href) {
+                    // Add the 'active' class to the matching link
+                    link.classList.add('asd');
+                }
+            });
+        });
+    </script>
+    <!-- ./wrapper -->
+    <!-- jQuery -->
+    <!-- Bootstrap 4 -->
+    <script src="../Admin/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- overlayScrollbars -->
+    <script src="../Admin/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="../Admin/dist/js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    @* <script src="../Admin/dist/js/demo.js"></script> *@
+
+    <!-- Visual Studio Browser Link -->
+    <script type="text/javascript" src="/_vs/browserLink" async="async" id="__browserLink_initializationData" data-requestId="d4e764fb79214a8283a275bb3f35152c" data-requestMappingFromServer="false" data-connectUrl="http://localhost:50243/0be70fc177e046ba96724f4e2d9519b4/browserLink"></script>
+    <!-- End Browser Link -->
+    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+</body>
+</html>

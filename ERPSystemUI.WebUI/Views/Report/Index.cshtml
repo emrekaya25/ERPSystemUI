@@ -1,0 +1,313 @@
+﻿@using ERPSystemUI.Model.Model
+@model ReportViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="~/js/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+<style>
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
+        margin-left: 1px;
+        border: none;
+        background-color: transparent;
+    }
+
+    .tooltip-text {
+        visibility: hidden;
+        width: fit-content;
+        background-color: black;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        top: 100%;
+        left: 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip-container:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>
+<script>
+    function toggleAccordion(rowId) {
+        var accordionId = 'accordion_' + rowId;
+        var accordion = document.getElementById(accordionId);
+        if (accordion.classList.contains('show')) {
+            accordion.classList.remove('show');
+        } else {
+            accordion.classList.add('show');
+        }
+    }
+    $(function () {
+        $('input[name="datefilter"]').daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Vazgeç',
+                monthNames: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                applyLabel: 'Uygula'
+            }
+        });
+        $('input[name="datefilter"]').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+
+            // Seçilen tarih aralığını Controller aksiyonuna gönder
+            var startDate = picker.startDate.toISOString();
+            var endDate = picker.endDate.toISOString();
+            sendDateRangeToController(startDate, endDate);
+        });
+
+        $('input[name="datefilter"]').on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+        });
+        function sendDateRangeToController(startDate, endDate) {
+            // $.ajax({
+            //     url: '/Admin/Raporlama',  // Controller adını ve aksiyon adını düzenleyin
+            //     type: 'GET',
+            //     data: { startDate: startDate, endDate: endDate },
+            //     success: function (result) {
+
+            //     },
+            //     error: function (error) {
+            //         console.log(error);
+            //     }
+            // });
+        }
+    });
+
+    $(document).ready(function () {
+        var ascending = true;
+        var itemsPerPage = 10;
+        var currentPage = 1;
+        var items = $("#my-table tbody tr");
+        var totalItems = items.length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var colSpanCount = $('#my-table tbody tr:first td').length;
+        var notFoundMessage = `<tr id="not-found" class="border-bottom"><td class="text-danger text-center fs-5" colspan="${colSpanCount}">Üzgünüz, aradığınız veri bulunamadı.</td></tr>`;
+        showPage(1);
+
+        $("#prev-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        $("#first-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            currentPage = 1;
+            showPage(currentPage);
+        });
+
+        $("#next-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        $("#last-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            currentPage = totalPages;
+            showPage(currentPage);
+        });
+
+        $('#my-table-search-input').keyup(function () {
+            $('#not-found').remove();
+            var searchText = $(this).val().toLowerCase();
+            var visibleRows = $('#my-table tbody tr').filter(function () {
+                var rowText = $(this).text().toLowerCase();
+                return rowText.indexOf(searchText) !== -1;
+            });
+            $('#my-table tbody tr').hide();
+            if (visibleRows.length > 0) {
+                visibleRows.show();
+                console.log(visibleRows.length);
+                $('#total-entity').text(visibleRows.length);
+            } else {
+                $('#total-entity').text(0);
+                $('#my-table tbody').append(notFoundMessage);
+            }
+            items = visibleRows;
+            totalItems = items.length;
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages == 0) {
+                totalPages = 1
+            }
+            showPage(1);
+            updateButtons();
+        });
+
+        $('#items-per-page').on('change', function () {
+            var selectedValue = $(this).val();
+            itemsPerPage = selectedValue;
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages == 0) {
+                totalPages = 1
+            }
+            showPage(1);
+            updateButtons();
+        });
+
+        function showPage(page) {
+            $(".page-number").text(currentPage + "/" + totalPages);
+            items.hide();
+            items.slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            updateButtons();
+        }
+
+        function updateButtons() {
+            $("#first-page").toggle(currentPage > 1);
+            $("#prev-page").toggle(currentPage > 1);
+            $("#next-page").toggle(currentPage < totalPages);
+            $("#last-page").toggle(currentPage < totalPages);
+        }
+
+
+    });
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = ('0' + (now.getMonth() + 1)).slice(-2);
+    const day = ('0' + now.getDate()).slice(-2);
+    const day2 = ('0' + (now.getDate() + 1)).slice(-2);
+    const hours = ('0' + now.getHours()).slice(-2);
+    const minutes = ('0' + now.getMinutes()).slice(-2);
+    const seconds = ('0' + now.getSeconds()).slice(-2);
+    const formattedDate = `${day}/${month}/${year} - ${day2}/${month}/${year}`;
+    const firstDayOfMonth = new Date(year, now.getMonth(), 1); // Mevcut ayın ilk günü
+    const lastDayOfMonth = new Date(year, now.getMonth() + 1, 0);
+    const firstDayOfYear = new Date(year, 0, 1); // Bulunduğunuz yılın ilk günü
+    const lastDayOfYear = new Date(year, 11, 31); // Bulunduğunuz yılın son günü
+    const today = now.getDay(); // Mevcut günün indeksi (0=Pazar, 1=Pazartesi, ..., 6=Cumartesi)
+    const diffToMonday = today === 0 ? 6 : today - 1; // Pazartesiden itibaren geçen gün sayısı
+    const diffToSunday = 7 - today; // Pazardan geriye kalan gün sayısı
+    const firstDayOfWeek = new Date(now.getTime() - diffToMonday * 24 * 60 * 60 * 1000); // Bulunduğunuz haftanın ilk günü
+    const lastDayOfWeek = new Date(now.getTime() + diffToSunday * 24 * 60 * 60 * 1000); // Bulunduğunuz haftanın son günü
+    const formattedDateByWeek = `${firstDayOfWeek.getDate()}/${firstDayOfWeek.getMonth() + 1}/${firstDayOfWeek.getFullYear()} - ${lastDayOfWeek.getDate()}/${lastDayOfWeek.getMonth() + 1}/${lastDayOfWeek.getFullYear()}`;
+    const formattedDateByYear = `${firstDayOfYear.getDate()}/${firstDayOfYear.getMonth() + 1}/${year} - ${lastDayOfYear.getDate()}/${lastDayOfYear.getMonth() + 1}/${year}`;
+    const formattedDateByMonth = `${firstDayOfMonth.getDate()}/${month}/${year} - ${lastDayOfMonth.getDate()}/${month}/${year}`;
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.getElementById('formattedDate').textContent = formattedDate;
+    });
+    function submitForm() {
+        $("#dateInput").val(formattedDateByMonth);
+        document.getElementById('invoiceByDate').submit();
+    }
+    function submitForm2() {
+        $("#dateInput").val(formattedDateByYear);
+        document.getElementById('invoiceByDate').submit();
+    }
+    function submitForm3() {
+        $("#dateInput").val(formattedDateByWeek);
+        document.getElementById('invoiceByDate').submit();
+    }
+</script>
+<div id="dol" style="margin-bottom:10px;">
+
+
+    @using (Html.BeginForm("GetInvoiceByDate", "Report", FormMethod.Post, new { id = "invoiceByDate" }))
+    {
+
+        <div class="row">
+            <div class="col-6 d-flex justify-content-start" style="max-height:40px;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                    </span>
+                </div>
+                <input autocomplete="off" id="dateInput" placeholder="Tarihi Seçiniz" type="text" name="datefilter" />
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-magnifying-glass-chart text-dark border-0"></i>
+                </button>
+                <div class="tooltip-container input-group-text">
+                    <i class="fa-solid fa-circle-info" id="info"></i>
+                    <span class="tooltip-text">Tarihi (<b id="formattedDate"></b>) Formatında giriniz...</span>
+                </div>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+                <div class="input-group-text border-0 bg-transparent" onclick="submitForm3()">
+                    <button class="btn btn-outline-success">Haftalık Rapor</button>
+                </div>
+                <div class="input-group-text border-0 bg-transparent" onclick="submitForm()">
+                    <button class="btn btn-outline-success">Aylık Rapor</button>
+                </div>
+                <div class="input-group-text border-0 bg-transparent" onclick="submitForm2()">
+                    <button class="btn btn-outline-success">Yıllık Rapor</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Rapor Listesi</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="example1" class="table table-bordered table-striped">
+            <thead class="bg-dark">
+                <tr>
+                    <th></th>
+                    <th>Fatura Numarası</th>
+                    <th>Alıcı</th>
+                    <th>Alıcı Mail</th>
+                    <th>Tedarikçi</th>
+                    <th>Tedarikçi Mail</th>
+                    <th>Tedarikçi Telefon</th>
+                    <th>Tarih</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="8" class="text-center text-danger">Sonuç Bulunamadı...</td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+
+

@@ -1,0 +1,459 @@
+﻿@using ERPSystemUI.Model.Model
+@model ReportViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="~/js/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+
+
+<div id="dol" style="margin-bottom:10px;">
+
+
+    @using (Html.BeginForm("GetInvoiceByDate", "Report", FormMethod.Post, new { id = "invoiceByDate" }))
+    {
+        <div class="row">
+            <div class="col-6 d-flex justify-content-start" style="max-height:40px;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                    </span>
+                </div>
+                <input autocomplete="off" id="dateInput" placeholder="Tarihi Seçiniz" type="text" name="datefilter" />
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-magnifying-glass-chart text-dark border-0"></i>
+                </button>
+                <div class="tooltip-container input-group-text">
+                    <i class="fa-solid fa-circle-info" id="info"></i>
+                    <span class="tooltip-text">Tarihi (<b id="formattedDate"></b>) Formatında giriniz...</span>
+                </div>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+                <div class="input-group-text border-0 bg-transparent" onclick="submitForm3()">
+                    <button class="btn btn-outline-success">Haftalık Rapor</button>
+                </div>
+                <div class="input-group-text border-0 bg-transparent" onclick="submitForm()">
+                    <button class="btn btn-outline-success">Aylık Rapor</button>
+                </div>
+                <div class="input-group-text border-0 bg-transparent" onclick="submitForm2()">
+                    <button class="btn btn-outline-success">Yıllık Rapor</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Rapor Listesi</h3>
+            </div>
+            <!-- ./card-header -->
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="bg-dark">
+                        <tr>
+                            <th></th>
+                            <th>Fatura Numarası</th>
+                            <th>Alıcı</th>
+                            <th>Alıcı Mail</th>
+                            <th>Tedarikçi</th>
+                            <th>Tedarikçi Mail</th>
+                            <th>Tedarikçi Telefon</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            decimal totalSum = 0;
+                        }
+                        @foreach (var item in Model.Invoices)
+                        {
+                            <tr data-widget="expandable-table" aria-expanded="false">
+                                <td><i class="fa-solid fa-angle-down"></i></td>
+                                <td>@item.InvoiceNo</td>
+                                <td>@item.CompanyName</td>
+                                <td>@item.CompanyMail</td>
+                                <td>@item.SupplierName</td>
+                                <td>@item.SupplierMail</td>
+                                <td>@item.SupplierPhone</td>
+                                <td>@item.InvoiceDate</td>
+                            </tr>
+                            <tr class="expandable-body">
+                                <td colspan="8">
+                                    <p>
+                                        <div class="container">
+                                            <table class="table table-bordered table-striped table-hover">
+                                                <thead class="bg-secondary">
+                                                    <tr>
+                                                        <th>Ürün</th>
+                                                        <th>Ürün Açıklama</th>
+                                                        <th>Birim Fiyat</th>
+                                                        <th>Miktar</th>
+                                                        <th>Toplam Fiyat</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var items in item.InvoiceDetails)
+                                                    {
+                                                        {
+                                                            totalSum += items.Sum;
+                                                        }
+                                                        <tr data-widget="expandable-table" aria-expanded="false">
+                                                            <td>@items.ProductName</td>
+                                                            <td>@items.ProductDescription</td>
+                                                            <td>@items.UnitPrice</td>
+                                                            <td>@items.Quantity</td>
+                                                            <td>@items.Sum</td>
+
+                                                        </tr>
+                                                    }
+
+                                                </tbody>
+                                                <tr style="background-color:lightgreen;">
+                                                    <td colspan="4">Toplam:</td>
+                                                    <td>@totalSum</td>
+                                                </tr>
+
+                                                @{
+                                                    totalSum = 0;
+                                                }
+                                            </table>
+                                        </div>
+                                    </p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="far fa-chart-bar"></i>
+            Rapor Grafiği
+        </h3>
+
+        <div class="card-tools">
+            
+            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="myChart" style="max-height:90% !important; min-width:100% !important;"></canvas>
+    </div>
+    <!-- /.card-body-->
+</div>
+
+
+
+@{
+    decimal Ocak = 0;
+    decimal Subat = 0;
+    decimal Mart = 0;
+    decimal Nisan = 0;
+    decimal Mayis = 0;
+    decimal Haziran = 0;
+    decimal Temmuz = 0;
+    decimal Agustos = 0;
+    decimal Eylul = 0;
+    decimal Ekim = 0;
+    decimal Kasim = 0;
+    decimal Aralik = 0;
+
+
+
+
+    foreach (var item in Model.Invoices)
+    {
+        if (item.InvoiceDate.Value.Month==1)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Ocak += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==2)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Subat += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==3)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Mart += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==4)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Nisan += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==5)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Mayis += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==6)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Haziran += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==7)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Temmuz += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==8)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Agustos += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==9)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Eylul += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==10)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Ekim += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==11)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Kasim += detail.Sum;
+            }
+        }
+        else if (item.InvoiceDate.Value.Month==12)
+        {
+            foreach (var detail in item.InvoiceDetails)
+            {
+                Aralik += detail.Sum;
+            }
+        }
+
+
+
+       
+    }
+        
+
+    
+}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+<style>
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
+        margin-left: 1px;
+        border: none;
+        background-color: transparent;
+    }
+
+    .tooltip-text {
+        visibility: hidden;
+        width: fit-content;
+        background-color: black;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        top: 0%; /* Tooltip metninin ikonun hemen altında görünmesi için */
+        left: 100%;
+        /* Tooltip metninin ortalanması için */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip-container:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>
+@section scripts {
+    @{
+        
+    }
+    <script>
+        const ctx = document.getElementById('myChart');
+        ocak = @Ocak;
+        subat = @Subat;
+        mart = @Mart;
+        nisan = @Nisan;
+        mayis = @Mayis;
+        haziran = @Haziran;
+        temmuz = @Temmuz;
+        agustos = @Agustos;
+        eylul = @Eylul;
+        ekim = @Ekim;
+        kasim = @Kasim;
+        aralik = @Aralik;
+
+        var bar_data = {
+            data: [0,0,0,0,0,0,0,0,0,0,0,0],
+            bars: { show: true }
+        }
+
+        // int değerleri bar_data içindeki ikinci değerlere atama
+        var values = [ocak, subat, mart, nisan, mayis, haziran, temmuz, agustos, eylul, ekim, kasim, aralik];
+        for (var i = 0; i < bar_data.data.length; i++) {
+            bar_data.data[i] = values[i];
+        }
+        console.log(bar_data.data);
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                datasets: [{
+                    label: 'Fiyat',
+                    data: bar_data.data,
+                    backgroundColor: 'rgba(0, 128, 0, 0.3)', // Bar rengi
+                    borderColor: 'rgba(46, 139, 87, 1)', // Kenar rengi
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        function toggleAccordion(rowId) {
+            var accordionId = 'accordion_' + rowId;
+            var accordion = document.getElementById(accordionId);
+            if (accordion.classList.contains('show')) {
+                accordion.classList.remove('show');
+            } else {
+                accordion.classList.add('show');
+            }
+        }
+        $(function () {
+            $('input[name="datefilter"]').daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'Vazgeç',
+                    monthNames: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                    applyLabel: 'Uygula'
+                }
+            });
+            $('input[name="datefilter"]').on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+
+                // Seçilen tarih aralığını Controller aksiyonuna gönder
+                var startDate = picker.startDate.toISOString();
+                var endDate = picker.endDate.toISOString();
+                sendDateRangeToController(startDate, endDate);
+            });
+
+            $('input[name="datefilter"]').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+            });
+            function sendDateRangeToController(startDate, endDate) {
+                // $.ajax({
+                //     url: '/Admin/Raporlama',  // Controller adını ve aksiyon adını düzenleyin
+                //     type: 'GET',
+                //     data: { startDate: startDate, endDate: endDate },
+                //     success: function (result) {
+
+                //     },
+                //     error: function (error) {
+                //         console.log(error);
+                //     }
+                // });
+            }
+        });
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = ('0' + (now.getMonth() + 1)).slice(-2);
+        const day = ('0' + now.getDate()).slice(-2);
+        const day2 = ('0' + (now.getDate() + 1)).slice(-2);
+        const hours = ('0' + now.getHours()).slice(-2);
+        const minutes = ('0' + now.getMinutes()).slice(-2);
+        const seconds = ('0' + now.getSeconds()).slice(-2);
+        const formattedDate = `${day}/${month}/${year} - ${day2}/${month}/${year}`;
+        const firstDayOfMonth = new Date(year, now.getMonth(), 1); // Mevcut ayın ilk günü
+        const lastDayOfMonth = new Date(year, now.getMonth() + 1, 0);
+        const firstDayOfYear = new Date(year, 0, 1); // Bulunduğunuz yılın ilk günü
+        const lastDayOfYear = new Date(year, 11, 31); // Bulunduğunuz yılın son günü
+        const today = now.getDay(); // Mevcut günün indeksi (0=Pazar, 1=Pazartesi, ..., 6=Cumartesi)
+        const diffToMonday = today === 0 ? 6 : today - 1; // Pazartesiden itibaren geçen gün sayısı
+        const diffToSunday = 7 - today; // Pazardan geriye kalan gün sayısı
+        const firstDayOfWeek = new Date(now.getTime() - diffToMonday * 24 * 60 * 60 * 1000); // Bulunduğunuz haftanın ilk günü
+        const lastDayOfWeek = new Date(now.getTime() + diffToSunday * 24 * 60 * 60 * 1000); // Bulunduğunuz haftanın son günü
+        const formattedDateByWeek = `${firstDayOfWeek.getDate()}/${firstDayOfWeek.getMonth() + 1}/${firstDayOfWeek.getFullYear()} - ${lastDayOfWeek.getDate()}/${lastDayOfWeek.getMonth() + 1}/${lastDayOfWeek.getFullYear()}`;
+        const formattedDateByYear = `${firstDayOfYear.getDate()}/${firstDayOfYear.getMonth() + 1}/${year} - ${lastDayOfYear.getDate()}/${lastDayOfYear.getMonth() + 1}/${year}`;
+        const formattedDateByMonth = `${firstDayOfMonth.getDate()}/${month}/${year} - ${lastDayOfMonth.getDate()}/${month}/${year}`;
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('formattedDate').textContent = formattedDate;
+        });
+        function submitForm() {
+            $("#dateInput").val(formattedDateByMonth);
+            document.getElementById('invoiceByDate').submit();
+        }
+        function submitForm2() {
+            $("#dateInput").val(formattedDateByYear);
+            document.getElementById('invoiceByDate').submit();
+        }
+        function submitForm3() {
+            $("#dateInput").val(formattedDateByWeek);
+            document.getElementById('invoiceByDate').submit();
+        }
+    </script>
+}

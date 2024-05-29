@@ -1,0 +1,328 @@
+﻿@using ERPSystemUI.Model.Model
+@model OfferViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Offer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/offer.js"></script>
+@functions {
+    string DecodeHtmlCharacters(string htmlEncodedString)
+    {
+        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+    }
+}
+@if (TempData["responseOffer"] != null)
+{
+    var x = TempData["responseOffer"].ToString();
+    <script>
+        Swal.fire({
+            title: "Başarılı!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "success"
+        });
+    </script>
+}
+@if (TempData["errorOffer"] != null)
+{
+    var x = TempData["errorOffer"].ToString();
+    <script>
+        Swal.fire({
+            title: "Hata!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "error"
+        });
+    </script>
+}
+
+@* tablo *@
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Teklifler</h3>
+        @*                 <div class="card-tools col-2">
+        <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#modal-NewOffer">Ekle</button>
+        </div> *@
+    </div>
+    <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-4">
+                <select class="form-control" id="items-per-page">
+                        <option value="5">Her sayfada 5 istek göster.</option>
+                        <option selected value="10">Her sayfada 10 istek göster.</option>
+                        <option value="25">Her sayfada 25 istek göster.</option>
+                        <option value="50">Her sayfada 50 istek göster.</option>
+                    </select>
+                </div>
+                <div class="col-8">
+                    <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" />
+                </div>
+
+            </div>
+            <!-- table start -->
+            <table id="my-table" class="table  table-striped table-borderless shadow">
+                <!-- thead start -->
+                
+                <thead>
+                    <tr class="text-center fs-6 border-bottom">
+                        <th style="width: 10px; text-align:start;">#</th>
+                        <th style="text-align:start;">İstek Başlığı</th>
+                        <th style="text-align:start;">Açıklama</th>
+                        <th style="text-align:start;">Miktar</th>
+                        <th style="text-align:start;">Ürün Adı</th>
+                        <th style="text-align:start;">İsteği Yapan Kişi</th>
+                        <th style="text-align:start;">İsteği Onaylayan Kişi</th>
+                        <th style="text-align:start;">Teklif Onay Durumu</th>
+
+
+                    </tr>
+                </thead>
+                <!-- thead end -->
+                <!-- tbody start -->
+                <tbody>
+                    @{
+                        int count = 0;
+                    }
+                    @foreach (var item in Model.Requests)
+                    {
+                        count++;
+                        <tr class="border-bottom">
+                            <td>@count</td>
+                            <td>@item.Title</td>
+                            <td>@item.Description</td>
+                            <td>@item.Quantity @item.UnitName</td>
+                            <td>@item.ProductName </td>
+                            <td>@item.RequesterName</td>
+                            <td>@item.ApproverName</td>
+
+
+
+                            <td>
+
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        İşlemler
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <button id="btnUpdateRequest"
+                                                onclick='addNewOffer(
+                                        "@item.Id",
+                                        "@item.Title",
+                                        "@item.Quantity",
+                                        "@item.UnitId",
+                                        "@item.ProductId",
+                                        "@item.RequesterId")' class="dropdown-item btn">
+                                            Teklif Yap
+                                        </button>
+                                        <button id="btnOpenOffers"
+                                                onclick='postData("@item.Id")' class="dropdown-item btn">
+                                            Teklifler
+                                        </button>
+
+
+
+                                    </div>
+                                </div>
+                            </td>
+
+                        </tr>
+
+                    }
+                </tbody>
+                <!-- tbody end -->
+                <!-- tfoot start -->
+                <tfoot>
+                    <tr>
+                        <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> Teklif</td>
+                        <td class="text-end border-0" colspan="5">
+                            <nav class="d-flex justify-content-end">
+                                <ul class="pagination fw-bold">
+                                    <li class="page-item">
+                                        <button id="first-page" class="page-link text-black">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button id="prev-page" class="page-link text-black">
+                                            <span aria-hidden="true">&lsaquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+                                    <li>
+                                        <button id="next-page" class="page-link text-black">
+                                            <span aria-hidden="true">&rsaquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <button id="last-page" class="page-link text-black">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </td>
+                    </tr>
+                </tfoot>
+                <!-- tfoot end -->
+            </table>
+            <!-- table end -->
+        </div>
+
+
+</div>
+<div id="offerList"></div>
+@* Ekleme *@
+<div class="modal fade" id="modal-NewOffer">
+    <div class="modal-dialog modal-NewOffer">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Yeni Teklif</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddOffer", "Offer", FormMethod.Post, new { id = "addOfferForm" }))
+                {
+                    <div class="modal-body">
+                        <input name="RequestId" hidden="hidden" id="RequestId" />
+                        <div class="form-group">
+                            <label for="txtOfferSupplierName_Add">Teklifi yapan kişi</label>
+                            <input name="SupplierName" type="text" class="form-control" id="txtOfferSupplierName_Add">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtOfferDescription_Add">Açıklama</label>
+                            <textarea name="Description" class="form-control" rows="5" id="txtOfferDescription_Add"></textarea>
+                            <div class="invalid-feedback">Açıklama alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtOfferPrice_Add">Fiyat</label>
+                            <input name="Price" type="number" min="0" class="form-control" id="txtOfferPrice_Add">
+                            <div class="invalid-feedback">Fiyat alanı boş bırakılamaz.</div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddOffer">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal" id="modal-Offers">
+    <div class="modal-dialog modal-xl modal-Offers">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Teklifler</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <table class="table table-striped" id="offerTable">
+
+                    <thead>
+                        <tr class="text-center fs-6 border-bottom">
+                            <th style="width: 10px; text-align:start;">#</th>
+                            <th style="text-align:start;">Başlık</th>
+                            <th style="text-align:start;">Tedarikçi</th>
+                            <th style="text-align:start;">Açıklama</th>
+                            <th style="text-align:start;">Fiyat</th>
+                            <th style="text-align:start;">Durum</th>
+                            <th style="text-align:start;">İşlemi Yapan Kişi</th>
+
+
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-UpdateOffers">
+    <div class="modal-dialog modal-UpdateOffers">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Yeni Teklif</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("UpdateOffer", "Offer", FormMethod.Post, new { id = "updateOfferForm" }))
+                {
+                    <div class="modal-body">
+                        <input name="RequestId" hidden="hidden" id="updateOfferRequestId" />
+                        <input name="Id" hidden="hidden" id="updateOfferId" />
+                        <input name="ApproverUserId" hidden="hidden" id="updateOfferApproverUserId" />
+                        <input name="StatusId" hidden="hidden" id="updateOfferStatusId" />
+                        <div class="form-group">
+                            <label for="txtOfferSupplierName_Update">Teklifi yapan kişi</label>
+                            <input name="SupplierName" type="text" class="form-control" id="txtOfferSupplierName_Update">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtOfferDescription_Update">Açıklama</label>
+                            <textarea name="Description" class="form-control" rows="5" id="txtOfferDescription_Update"></textarea>
+                            <div class="invalid-feedback">Açıklama alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtOfferPrice_Update">Fiyat</label>
+                            <input name="Price" type="number" class="form-control" id="txtOfferPrice_Update">
+                            <div class="invalid-feedback">Fiyat alanı boş bırakılamaz.</div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateOffer">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<script>
+    var userId = @Accessor.HttpContext.Session.GetString("UserId");    
+</script>
+<style>
+    .dropdown-toggle {
+        background-color: #0c6e4b !important;
+    }
+</style>

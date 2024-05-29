@@ -1,0 +1,191 @@
+﻿@using ERPSystemUI.Model.Model
+@model CompanyViewModel
+@{
+    ViewData["Title"] = "Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@functions {
+    string DecodeHtmlCharacters(string htmlEncodedString)
+    {
+        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+    }
+}
+@if (TempData["responseCompany"] != null)
+{
+    var x = TempData["responseCompany"].ToString();
+    <script>
+        Swal.fire({
+            title: "Başarılı!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "success"
+        });
+    </script>
+}
+@if (TempData["errorCompany"] != null)
+{
+    var x = TempData["errorCompany"].ToString();
+    <script>
+        Swal.fire({
+            title: "Hata!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "error"
+        });
+    </script>
+}
+
+<script src="~/js/company.js"></script>
+
+<div class="row mb-3">
+    <div class="col-md-9">
+        <input type="text" id="ara" class="form-control" placeholder="Şirket Ara...">
+    </div>
+    <div class="col-md-3">
+        <button type="button" class="btn btn-success col-md-12" data-toggle="modal" data-target="#Modal">Ekle</button>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 " id="CompanySearch">
+    @foreach (var item in Model.Companies)
+    {
+        <div class="col mb-3 arama">
+            <div class="card h-100" style="display:flex !important;flex-direction:column !important;" id="cardDark">
+                <div class="p-3 card-img-top">
+                    <img height="250" width="100%" src="data:image/jpeg;base64,@item.Image" alt="@item.Name" />
+
+                </div>
+
+                <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h1 class="card-title font-weight-bold ">@item.Name</h1>
+                    </div>
+                    <div>
+                        @using (Html.BeginForm("GetDepartment", "Company", FormMethod.Post, new { id = "getCompanyDepartments", style = "display: inline-block;" }))
+                        {
+                            <input type="hidden" value="@item.Id" name="CompanyId" />
+                            <button type="submit" class="btn btn-primary">Detay</button>
+                        }
+
+                        @using (Html.BeginForm("UpdateCompany", "Company", FormMethod.Post, new { id = "updateCompany", style = "display: inline-block;", enctype = "multipart/form-data" }))
+                        {
+                            <button type="button" onclick='companyDetailModal("@item.Id", "@item.Name","@item.Mail","@item.Phone","@item.Image")' class="btn btn-warning">Güncelle</button>
+                        }
+
+                        @using (Html.BeginForm("DeleteCompany", "Company", FormMethod.Post, new { id = "deleteCompany", style = "display: inline-block; float:right;" }))
+                        {
+                            <input type="hidden" value="@item.Id" name="Id" />
+                            <button type="submit" class="btn btn-danger">Sil</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="Modal">
+    <div class="modal-dialog exampleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Yeni Şirket</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddCompany", "Company", FormMethod.Post, new { id = "addCompanyForm", enctype = "multipart/form-data" }))
+                {
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="txtCompanyName_Add">Ad</label>
+                            <input name="Name" type="text" class="form-control" id="txtCompanyName_Add">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtQuantity_Add">Email</label>
+                            <input name="Mail" type="text" class="form-control" id="txtMail_Add">
+                            <div class="invalid-feedback">Geçerli bir e-posta adresi giriniz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtQuantity_Add">Telefon Numarası</label>
+                            <input name="Phone" type="text" class="form-control" id="txtPhone_Add">
+                            <div class="invalid-feedback">Telefon numarası boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtCompanyImage_Add">Resim</label>
+                            <input name="companyImage" type="file" class="form-control" rows="5" id="txtCompanyImage_Add">
+                            <div class="invalid-feedback">Resim seçmelisiniz.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddCompany">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+
+<div class="modal fade" id="modal-updateCompany">
+    <div class="modal-dialog exampleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Şirket Güncelle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("UpdateCompany", "Company", FormMethod.Post, new { id = "updateCompanyForm", enctype = "multipart/form-data" }))
+                {
+                    <div class="modal-body">
+
+                        <input hidden="hidden" name="Id" id="txtCompanyId_Update" />
+                        <div class="form-group">
+                            <label for="txtCompanyName_Update">Ad</label>
+                            <input name="Name" type="text" class="form-control" id="txtCompanyName_Update">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtQuantity_Add">Email</label>
+                            <input name="Mail" type="text" class="form-control" id="txtEmail_Update">
+                            <div class="invalid-feedback">Geçerli bir e-posta adresi giriniz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtQuantity_Add">Telefon Numarası</label>
+                            <input name="Phone" type="text" class="form-control" id="txtPhone_Update">
+                            <div class="invalid-feedback">Telefon numarası boş bırakılamaz.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtCompanyImage_Update">Resim</label>
+                            <input name="companyImage" type="file" class="form-control" rows="5" id="txtCompanyImage_Update">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateCompany">Güncelle</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

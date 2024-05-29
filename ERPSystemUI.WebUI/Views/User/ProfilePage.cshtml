@@ -1,0 +1,158 @@
+﻿@using ERPSystemUI.Model.DTO.User
+@using ERPSystemUI.Model.Model
+@using ERPSystemUI.WebUI.SessionHelper
+@model UserViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    UserDTO userDTO = Model.User;
+}
+
+@if (userDTO != null)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-3">
+
+                    <div class="card-header d-flex justify-content-end">
+                        <div>
+                            @if (SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür"))
+                            {
+                                <button class="btn btn-warning" onclick='updateUserModal("@userDTO.Id","@userDTO.Name","@userDTO.Email","@userDTO.Phone","@userDTO.Password","@userDTO.Image","@userDTO.DepartmentId")' data-toggle="modal" data-target="#modal-updateUserModal">
+                                    Güncelle
+                                </button>
+                            }
+                            
+
+                        </div>
+                    </div>
+                    <div class="row g-0">
+                        <div class="col-md-4" style="margin-top: auto; margin-bottom: auto; padding-left: 40px;">
+                            <img src="data:image/jpeg;base64,@userDTO.Image" class="img-fluid rounded-start" alt="User Photo" style="min-height:250px; max-height:250px;" height: auto;">
+                        </div>
+                        <div class="col-md-8" style="margin-top: auto; margin-bottom: auto;">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 10px;">@userDTO.Name</h5>
+                                <p class="card-text" style="font-size: 18px; color: #666; margin-bottom: 10px;">Şirket: @userDTO.CompanyName</p>
+                                <p class="card-text" style="font-size: 18px; color: #666; margin-bottom: 10px;">Departman: @userDTO.DepartmentName</p>
+                                <p class="card-text" style="font-size: 18px; color: #666; margin-bottom: 10px;">Yetkiler:</p>
+                                <ul class="list-group">
+                                    @foreach (var role in userDTO.Roles)
+                                    {
+                                        <li class="list-group-item" style="font-size: 16px; color: #888; background-color: #f8f9fa; border-color: #ddd;">@role.Name</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="modal-updateUserModal">
+        <div class="modal-dialog modal-updateUserModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Bilgileri Güncelle</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @{
+
+
+                    using (Html.BeginForm("UpdateProfile", "User", FormMethod.Post, new { id = "updateUserForm", enctype = "multipart/form-data" }))
+                    {
+                        <div class="modal-body">
+                            <input id="updateUserId" hidden="hidden" name="Id" />
+
+                            <div class="form-group">
+                                <label for="txtUserName_Update">Ad</label>
+                                <input name="Name" type="text" class="form-control" id="txtUserName_Update">
+                            </div>
+                            <div class="form-group">
+                                <label for="txtUserEmailName_Update">Email</label>
+                                <input name="Email" type="text" class="form-control" id="txtUserEmailName_Update">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="txtPhoneNumber_Update">Telefon Numarası</label>
+                                <input name="Phone" class="form-control" rows="5" id="txtPhoneNumber_Update">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="txtPassword_Update">Şifre</label>
+                                <input name="Password" type="password" class="form-control" rows="5" id="txtPassword_Update">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="txtImage_Update">Fotoğraf</label>
+                                <input name="imageFile" type="file" class="form-control" rows="5" id="txtImage_Update">
+                            </div>
+
+                            <div hidden="hidden" class="form-group">
+                                <label for="ddlDepartment_Update">Departman</label>
+                                <select name="DepartmentId" class="custom-select rounded-0" id="ddlDepartment_Update">
+                                    @{
+
+                                        for (int i = 0; i < Model.Departments.Count; i++)
+                                        {
+                                            if (Model.User.DepartmentId == Model.Departments[i].Id)
+                                            {
+                                                <option selected="selected" value="@Model.Departments[i].Id">@Model.Departments[i].Name </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@Model.Departments[i].Id">@Model.Departments[i].Name</option>
+                                            }
+
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                            <button type="submit" class="btn btn-primary" id="btnUpdateUser">Kaydet</button>
+                        </div>
+                    }
+
+
+
+                }
+            </div>
+
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+
+    <script>
+        localStorage.setItem('currentUserId', '@userDTO.Id');
+
+        function updateUserModal(id, name, email, phone, password, image, department) {
+            $("#modal-updateUserModal").modal("show");
+            $("#updateUserId").val(id);
+            $("#txtUserName_Update").val(name);
+            $("#txtUserEmailName_Update").val(email);
+            $("#txtPhoneNumber_Update").val(phone);
+            $("#txtPassword_Update").val(password);
+            $("#txtImage_Update").val(image);
+            $("#ddlDepartment_Update").val(department);
+        }
+
+    </script>
+}
+
+
+

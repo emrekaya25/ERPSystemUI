@@ -1,0 +1,199 @@
+﻿@using ERPSystemUI.Model.Model
+@using ERPSystemUI.WebUI.SessionHelper
+@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@inject IHttpContextAccessor Accessor
+
+<!-- #region anasayfadaki tekrar verilerini alma -->
+@{
+    var products = 0;
+    var confirmedRequests = 0;
+    var unconfirmedRequests = 0;
+    var rejectedRequests = 0;
+    decimal productsInStocks = 0;
+}
+@if (SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür"))
+{
+    foreach (var item in Model.Products)
+    {
+        products++;
+
+    }
+
+    foreach (var item in Model.Stocks)
+    {
+        productsInStocks += item.Quantity;
+    }
+
+}
+
+@foreach (var item in Model.Requests)
+{
+    if (item.StatusId == 2)
+    {
+        confirmedRequests += 1;
+    }
+    if (item.StatusId == 1)
+    {
+        unconfirmedRequests += 1;
+    }
+    if (item.StatusId == 3)
+    {
+        rejectedRequests += 1;
+    }
+
+}
+
+
+
+<!-- #endregion -->
+
+
+<div class="container text-center">
+    <div class="row">
+        <div class="col">
+            <div class="container text-center">
+                <div class="row">
+
+                    <div class="col">
+                        <div class="col-lg-3 col-6">
+                            <!-- small box -->
+                            <div class="small-box bg-success" style="min-width:245px;">
+                                <div class="inner">
+                                    <h3>@confirmedRequests</h3>
+
+                                    <p>Onaylanan İstekler</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <a href="/Requests" class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-6">
+                            <!-- small box -->
+                            <div class="small-box bg-orange" style="min-width:245px;">
+                                <div class="inner">
+                                    <h3>@unconfirmedRequests</h3>
+
+                                    <p>Bekleyen İstekler</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa-regular fa-hand-point-up"></i>
+                                </div>
+                                <a href="/Requests  " class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    @if (SessionRole.Roles.Contains("Çalışan"))
+                    {
+                        <div class="col">
+                            <div class="small-box bg-red" style="min-width:245px;">
+                                <div class="inner">
+                                    <h3>@rejectedRequests</h3>
+
+                                    <p>Reddedilen İstekler</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </div>
+                                <a href="/Requests  " class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="col">
+                        @if (SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür"))
+                        {
+                            <div class="col-lg-3 col-6">
+
+                                <!-- small box -->
+                                <div class="small-box bg-info" style="min-width:245px;">
+                                    <div class="inner">
+                                        <h3>@products</h3>
+                                        <p>Ürün Çeşit Sayısı</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa-solid fa-basket-shopping"></i>
+                                    </div>
+                                    <a href="/Products" class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6">
+                                <!-- small box -->
+                                <div class="small-box bg-lime" style="min-width:245px;">
+                                    <div class="inner">
+                                        <h3>@productsInStocks</h3>
+                                        <p>Stoktaki Toplam Ürün Sayısı</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa-solid fa-database"></i>
+                                    </div>
+                                    <a href="/Stocks" class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+        </div>
+        <div class="col">
+            <div class="card card-widget widget-user" style="min-height:305px">
+                <!-- Add the bg color to the header using any of the bg-* classes -->
+                <div class="widget-user-header text-white" style="background:seagreen">
+                    <h3 class="widget-user-username text-left" style="text-transform:uppercase;">@Accessor.HttpContext.Session.GetString("Name")</h3>
+                    <h3 class="widget-user-desc text-right">@Accessor.HttpContext.Session.GetString("Company")</h3>
+                    <h5 class="widget-user-username text-right">@Accessor.HttpContext.Session.GetString("Department")</h5>
+                </div>
+
+                <div class="widget-user-image">
+                    <img class="img-circle" src="data:image/jpeg;base64,@Accessor.HttpContext.Session.GetString("UserImage")" alt="User Avatar">
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-sm-6 border-right">
+                            <div class="description-block">
+                                <h5 class="description-header">Rol/Roller: </h5>
+                                <span class="description-text">
+                                    @foreach (var item in SessionRole.Roles)
+                                    {
+                                        <span class="description-text">@item</span>
+                                    }
+                                </span>
+                            </div>
+                            <!-- /.description-block -->
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-sm-6 border-right">
+                            <div class="description-block">
+                                <h5 class="description-header">Email: </h5>
+                                <span>@Accessor.HttpContext.Session.GetString("Email")</span>
+                            </div>
+                            <!-- /.description-block -->
+                        </div>
+                        <!-- /.col -->
+                        <!-- /.col -->
+                    </div>
+                    <!-- /.row -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+

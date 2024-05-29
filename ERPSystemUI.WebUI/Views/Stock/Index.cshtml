@@ -1,0 +1,471 @@
+﻿@using ERPSystemUI.Model.Model
+@model StockViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Stocks";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/stock.js"></script>
+@functions {
+    string DecodeHtmlCharacters(string htmlEncodedString)
+    {
+        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+    }
+}
+@if (TempData["responseStock"] != null)
+{
+    var x = TempData["responseStock"].ToString();
+    <script>
+        Swal.fire({
+            title: "Başarılı!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "success"
+        });
+    </script>
+}
+@if (TempData["errorStock"] != null)
+{
+    var x = TempData["errorStock"].ToString();
+    <script>
+        Swal.fire({
+            title: "Hata!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "error"
+        });
+    </script>
+}
+
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Stok</h3>
+        <div class="card-tools col-2">
+            <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#modal-NewStock">Ekle</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- table start -->
+        <div class="row mb-2">
+            <div class="col-4">
+                <select class="form-control" id="items-per-page">
+                    <option value="5">Her sayfada 5 stok göster.</option>
+                    <option selected value="10">Her sayfada 10 stok göster.</option>
+                    <option value="25">Her sayfada 25 stok göster.</option>
+                    <option value="50">Her sayfada 50 stok göster.</option>
+                </select>
+            </div>
+            <div class="col-8"> <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" /></div>
+        </div>
+        <table id="my-table" class="table  table-striped table-borderless shadow">
+            <!-- thead start -->
+
+            <thead>
+                <tr class="text-center fs-6 border-bottom">
+                    <th style="width: 10px; text-align:start;">Resim</th>
+                    <th style="text-align:start;">Ürün Adı</th>
+                    <th style="text-align:start;">Departman / Şirket</th>
+                    <th style="text-align:start;">Miktar</th>
+                    <th style="text-align:start;">Stok İşlemi</th>
+                    <th style="text-align:start;">Stok Hareketleri</th>
+                    <th style="text-align:start;">Sil</th>
+                </tr>
+            </thead>
+            <!-- thead end -->
+            <!-- tbody start -->
+            <tbody>
+                @{
+                    int count = 0;
+                }
+                @foreach (var item in Model.Stocks)
+                {
+                    count++;
+                    <tr style="cursor:pointer" class="border-bottom">
+                        <td><img class="card-img-top" style="max-width:100px" src="data:image/jpeg;base64,@item.ProductImage" alt="Stok"></td>
+                        <td class="align-content-center">@item.ProductName</td>
+                        <td class="align-content-center">@item.DepartmentName / @item.CompanyName</td>
+                        <td class="align-content-center">@item.Quantity @item.UnitName</td>
+                        <td class="align-content-center">
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    İşlemler
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <button id="btnAddStockQuantity"
+                                            onclick='addStockQuantity(
+                                        "@item.Id",
+                                        "@item.UnitId",
+                                        "@item.ProductId",
+                                        )' class="dropdown-item btn">
+                                        Stok Giriş
+                                    </button>
+                                    <button id="btnDecreaseStockQuantity"
+                                            onclick='decreaseStockQuantity(
+                                        "@item.Id",
+                                        "@item.UnitId",
+                                        "@item.ProductId",
+                                        )' class="dropdown-item btn">
+                                        Stok Çıkış
+                                    </button>
+                                    <button id="btnScrappingStockQuantity"
+                                            onclick='scrappingStockQuantity(
+                                        "@item.Id",
+                                        "@item.UnitId",
+                                        "@item.ProductId",
+                                        )' class="dropdown-item btn">
+                                        Hurdaya Ayır
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-content-center">
+                            <form id="getStockForm_@item.Id" action="/Stock/GetStockDetail" method="post">
+                                <input type="hidden" name="Id" value="@item.Id" />
+                                <button type="submit" class="btn btn-primary">Detay</button>
+                            </form>
+                        </td>
+                        <td class="align-content-center">
+                            <form id="deleteStockForm_@item.Id" action="/Stock/DeleteStock" method="post">
+                                <input type="hidden" name="Id" value="@item.Id" />
+                                <button type="submit" class="btn btn-danger">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+
+
+
+                }
+            </tbody>
+            <!-- tbody end -->
+            <!-- tfoot start -->
+            <tfoot>
+                <tr>
+                    <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> Stok</td>
+                    <td class="text-end border-0" colspan="4">
+                        <nav class="d-flex justify-content-end">
+                            <ul class="pagination fw-bold">
+                                <li class="page-item">
+                                    <button id="first-page" class="page-link text-black">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button id="prev-page" class="page-link text-black">
+                                        <span aria-hidden="true">&lsaquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+                                <li>
+                                    <button id="next-page" class="page-link text-black">
+                                        <span aria-hidden="true">&rsaquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item">
+                                    <button id="last-page" class="page-link text-black">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </td>
+                </tr>
+            </tfoot>
+            <!-- tfoot end -->
+        </table>
+        <!-- table end -->
+    </div>
+
+
+</div>
+
+<div class="modal fade" id="modal-NewStock">
+    <div class="modal-dialog modal-NewStock">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Yeni Stok</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+                using (Html.BeginForm("AddStock", "Stock", FormMethod.Post, new { id = "addStockForm" }))
+                {
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="ddlStockProduct_Add">Ürün</label>
+                            <select name="ProductId" class="custom-select rounded-0" id="ddlStockProduct_Add">
+                                <option value="">Ürün Seçiniz...</option>
+                                @{
+                                    for (int i = 0; i < Model.Products.Count; i++)
+                                    {
+                                        <option value="@Model.Products[i].Id">@Model.Products[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                            <div class="invalid-feedback">Ürün alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtStockQuantity_Add">Miktar</label>
+                            <input name="Quantity" class="form-control" rows="5" id="txtStockQuantity_Add" placeholder="Miktar...">
+                            <div class="invalid-feedback">Miktar alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ddlStockUnit_Add">Birim</label>
+                            <select name="UnitId" class="custom-select rounded-0" id="ddlStockUnit_Add">
+                                <option value="">Birim Seçiniz...</option>
+                                @{
+                                    for (int i = 0; i < Model.Units.Count; i++)
+                                    {
+                                        <option value="@Model.Units[i].Id">@Model.Units[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                            <div class="invalid-feedback">Birim alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ddlStockDepartment_Add">Departman</label>
+                            <select name="DepartmentId" class="custom-select rounded-0" id="ddlStockDepartment_Add">
+                                <option value="">Departman Seçiniz...</option>
+                                @{
+                                    for (int i = 0; i < Model.Departments.Count; i++)
+                                    {
+                                        <option value="@Model.Departments[i].Id">@Model.Departments[i].Name / @Model.Departments[i].CompanyName</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                            <div class="invalid-feedback">Departman alanı boş bırakılamaz.</div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddStock">Kaydet</button>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-UpdateStock">
+    <div class="modal-dialog modal-UpdateStock">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Stok Giriş</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddStockDetail", "Stock", FormMethod.Post, new { id = "updateStockDetailForm" }))
+                {
+                    <div class="modal-body">
+                        <input hidden="hidden" name="StockId" id="updateId" type="text" />
+                        <input hidden="hidden" name="UnitId" id="updateUnitId" type="text" />
+                        <input hidden="hidden" name="ProductId" id="updateProductId" type="text" />
+                        <input hidden="hidden" name="ProcessTypeId" id="updateProcessTypeId" type="text" />
+                        <input hidden="hidden" name="DelivererId" id="updateDelivererId" value="@Accessor.HttpContext.Session.GetString("UserId")" type="text" />
+                        <div hidden="hidden" class="form-group">
+                            <label for="ddlStockReciever_Add">Alıcı</label>
+                            <input name="ReceiverId" value="@Accessor.HttpContext.Session.GetString("UserId")" class="custom-select rounded-0" id="ddlStockReciever_Add">
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtStockQuantity_Add">Miktar</label>
+                            <input name="Quantity" class="form-control" rows="5" id="txtStockQuantity_AddSG" placeholder="Miktar...">
+                            <div class="invalid-feedback">Miktar alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div hidden="hidden" class="form-group">
+                            <label for="ddlStockUnit_Add">Birim</label>
+                            <select name="UnitId" class="custom-select rounded-0" id="ddlStockUnit_Add">
+                                @{
+                                    for (int i = 0; i < Model.Units.Count; i++)
+                                    {
+                                        <option value="">@Model.Units[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateStockSG">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="modal-RemoveStock">
+    <div class="modal-dialog modal-RemoveStock">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Stok Çıkış</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddStockDetail", "Stock", FormMethod.Post, new { id = "removeStockDetailForm" }))
+                {
+                    <div class="modal-body">
+                        <input hidden="hidden" name="StockId" id="removeId" type="text" />
+                        <input hidden="hidden" name="UnitId" id="removeUnitId" type="text" />
+                        <input hidden="hidden" name="ProductId" id="removeProductId" type="text" />
+                        <input hidden="hidden" name="ProcessTypeId" id="removeProcessTypeId" type="text" />
+                        <input hidden="hidden" name="DelivererId" id="removeDelivererId" value="@Accessor.HttpContext.Session.GetString("UserId")" type="text" />
+                        <div class="form-group">
+                            <label for="ddlStockReciever_Add">Alıcı</label>
+                            <select name="ReceiverId" class="custom-select rounded-0" id="ddlStockReciever_Remove">
+                            <option value="">Kullanıcı Seçiniz...</option>
+                                @{
+                                    for (int i = 0; i < Model.Users.Count; i++)
+                                    {
+                                        <option value="@Model.Users[i].Id">@Model.Users[i].Name</option>
+
+                                    }
+                                }
+                            </select>
+                            <div class="invalid-feedback">Kullanıcı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtStockQuantity_Remove">Miktar</label>
+                            <input name="Quantity" class="form-control" rows="5" id="txtStockQuantity_Remove" placeholder="Miktar...">
+                            <div class="invalid-feedback">Miktar boş bırakılamaz.</div>
+                        </div>
+
+                        <div hidden="hidden" class="form-group">
+                            <label for="ddlStockUnit_Remove">Birim</label>
+                            <select name="UnitId" class="custom-select rounded-0" id="ddlStockUnit_Remove">
+                                @{
+                                    for (int i = 0; i < Model.Units.Count; i++)
+                                    {
+                                        <option value="">@Model.Units[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnRemoveStock">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="modal-ScrappingStock">
+    <div class="modal-dialog modal-ScrappingStock">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Hurdaya Ayırma</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddStockDetail", "Stock", FormMethod.Post, new { id = "scrappingStockDetailForm" }))
+                {
+                    <div class="modal-body">
+                        <input hidden="hidden" name="StockId" id="scrappingId" type="text" />
+                        <input hidden="hidden" name="UnitId" id="scrappingUnitId" type="text" />
+                        <input hidden="hidden" name="ProductId" id="scrappingProductId" type="text" />
+                        <input hidden="hidden" name="ProcessTypeId" id="scrappingProcessTypeId" type="text" />
+                        <input hidden="hidden" name="DelivererId" id="scrappingDelivererId" value="@Accessor.HttpContext.Session.GetString("UserId")" type="text" />
+                        <div hidden="hidden" class="form-group">
+                            <label for="ddlStockReciever_Add">Alıcı</label>
+                            <input name="ReceiverId" value="@Accessor.HttpContext.Session.GetString("UserId")" class="custom-select rounded-0" id="ddlStockReciever_Add">
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtStockQuantity_Add">Miktar</label>
+                            <input name="Quantity" class="form-control" rows="5" id="txtStockQuantity_Junk" placeholder="Miktar...">
+                            <div class="invalid-feedback">Miktar boş bırakılamaz.</div>
+                        </div>
+
+                        <div hidden="hidden" class="form-group">
+                            <label for="ddlStockUnit_Add">Birim</label>
+                            <select name="UnitId" class="custom-select rounded-0" id="ddlStockUnit_Add">
+                                @{
+                                    for (int i = 0; i < Model.Units.Count; i++)
+                                    {
+                                        <option value="">@Model.Units[i].Name</option>
+
+                                    }
+                                }
+
+
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateStockJunk">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<style>
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-toggle {
+        background-color: #0c6e4b !important;
+    }
+</style>

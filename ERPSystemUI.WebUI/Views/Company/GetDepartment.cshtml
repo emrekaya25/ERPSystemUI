@@ -1,0 +1,150 @@
+﻿@using ERPSystemUI.Model.Model
+@model DepartmentViewModel
+@{
+    ViewData["Title"] = "Departments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Company = Model.Company;
+}
+<script src="~/js/department.js"></script>
+
+<div class="card-header d-flex justify-content-end">
+
+
+    <div>
+        <div class="d-flex">
+            <button type="button" onclick='addDepartmentModal("@Company.Id")' class="btn btn-success" data-toggle="modal" data-target="#modal-DepartmentModal">
+                Departman Ekle
+            </button>
+
+        </div>
+    </div>
+</div>
+
+
+@foreach (var item in Model.Departments)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-12" style="margin-top: auto; margin-bottom: auto;">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 10px;">@item.Name</h5>
+                                <p class="card-text" style="font-size: 18px; color: #666; margin-bottom: 10px;">Şirket: @item.CompanyName</p>
+
+                                <div class="d-flex justify-content-end">
+
+                                    <button class="btn btn-warning m-1" onclick='updateCompanyModal("@item.CompanyId","@item.Id","@item.Name")' data-toggle="modal" data-target="#modal-updateCompanyModal">
+                                        Güncelle
+                                    </button>
+
+
+                                    @using (Html.BeginForm("DeleteDepartment", "Company", FormMethod.Post, new { id = "deleteDepartmentForm", enctype = "multipart/form-data" }))
+                                    {
+                                        <input hidden="hidden" value="@item.Id" name="Id" />
+                                        <button type="submit" class="btn btn-danger m-1">
+                                            Departman Sil
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="modal fade" id="modal-DepartmentModal">
+    <div class="modal-dialog modal-DepartmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Departman Ekle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddDepartment", "Company", FormMethod.Post, new { id = "addDepartmentForm", enctype = "multipart/form-data" }))
+
+                {
+                    <div class="modal-body">
+
+
+                        <div class="form-group">
+                            <label for="txtDepartmentName_Add">Ad</label>
+                            <input name="Name" type="text" class="form-control" id="txtDepartmentName_Add" placeholder="Departman Adı">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <input hidden="hidden" name="CompanyId" value="@Company.Id" type="text" class="form-control" id="txtCompanyId_Add">
+
+
+
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddDepartment">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-updateDepartmentModal">
+    <div class="modal-dialog modal-updateDepartmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Departman Güncelle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("UpdateDepartment", "Company", FormMethod.Post, new { id = "updateDepartmentForm", enctype = "multipart/form-data" }))
+
+                {
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="txtDepartmentName_Update">Ad</label>
+                            <input name="Name" type="text" class="form-control" id="txtDepartmentName_Update">
+                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <input name="Id" hidden="hidden" id="Id" />
+                            <input name="CompanyId" hidden="hidden" type="text" class="form-control" id="txtCompanyId_Update">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateDepartment">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

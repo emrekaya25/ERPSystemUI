@@ -1,0 +1,301 @@
+﻿@using ERPSystemUI.Model.Model
+@model StockDetailViewModel
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "StockDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    decimal total = 0;
+}
+
+<div class="container">
+    <div class="row d-flex justify-content-center">
+        @foreach (var item in Model.StockDetails)
+        {
+
+            <div class="col-md-10">
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-6" style="margin-top: auto; margin-bottom: auto; padding-left: 40px;">
+                            <img src="data:image/jpeg;base64,@item.StockDetailImage" class="img-fluid rounded-start" alt="User Photo" style="min-height:250px; max-height:250px;" height: auto;">
+                        </div>
+                        <div class="col-md-6" style="margin-top: auto; margin-bottom: auto;">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 10px;">@item.ProductName</h5>
+                                <p class="card-text" style="font-size: 18px; color: #666; margin-bottom: 10px;"> @item.ProductDescription</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            break;
+        }
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Stok Hareketleri</h3>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <!-- table start -->
+                <table id="my-table" class="table  table-striped table-borderless shadow">
+                    <!-- thead start -->
+                    <thead>
+                        <tr class="border-bottom">
+                            <td colspan="2">
+                                <select class="form-control" id="items-per-page">
+                                    <option value="5">Her sayfada 5 stok hareketi göster.</option>
+                                    <option selected value="10">Her sayfada 10 stok hareketi göster.</option>
+                                    <option value="25">Her sayfada 25 stok hareketi göster.</option>
+                                    <option value="50">Her sayfada 50 stok hareketi göster.</option>
+                                </select>
+                            </td>
+                            <td colspan="3">
+                                <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" />
+                            </td>
+                        </tr>
+                        <tr class="text-center fs-6 border-bottom">
+                            <th style="width: 10px; text-align:start;">İşlem Tarihi</th>
+                            <th style="text-align:start;">İşlemi Yapan</th>
+                            <th style="text-align:start;">Alıcı</th>
+                            <th style="text-align:start;">Miktar</th>
+                            <th style="text-align:start;">İşlem Tipi</th>
+                        </tr>
+                    </thead>
+                    <!-- thead end -->
+                    <!-- tbody start -->
+                    <tbody>
+                        
+                        @{
+                            int count = 0;
+                        }
+                        @foreach (var item in Model.StockDetails)
+                        {
+                            count++;
+                            <tr class="border-bottom">
+                            
+                            @if (item.ProcessTypeId == 1)
+                            {
+
+                                    <td style="background-color:lightcyan" class="align-content-center">@item.AddedTime</td>
+                                    <td style="background-color:lightcyan" class="align-content-center">@item.DelivererName</td>
+
+                                    @if (item.ReceiverId == item.DelivererId)
+                                    {
+                                        <td style="background-color:lightcyan" class="align-content-center">
+                                            Stok Girişi Yapıldı
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td style="background-color:lightcyan" class="align-content-center">@item.RecieverName</td>
+                                    }
+
+                                    <td style="background-color:lightcyan" class="align-content-center">@item.Quantity @item.StockDetailUnitName</td>
+                                    <td style="background-color:lightcyan" class="align-content-center">@item.ProcessTypeName</td>
+                                    
+                                        total += @item.Quantity;
+                                    
+                                
+                            }
+                            else if (item.ProcessTypeId == 2)
+                            {
+                                    <td style="background-color:lightblue" class="align-content-center">@item.AddedTime</td>
+                                    <td style="background-color:lightblue" class="align-content-center">@item.DelivererName</td>
+                                    <td style="background-color:lightblue" class="align-content-center">@item.RecieverName</td>
+                                    <td style="background-color:lightblue" class="align-content-center">@item.Quantity @item.StockDetailUnitName</td>
+                                    <td style="background-color:lightblue" class="align-content-center">@item.ProcessTypeName</td>
+                                    
+                                        total -= @item.Quantity;
+                                    
+                            }
+                            else if (item.ProcessTypeId == 3)
+                            {
+                                    <td style="background-color:lawngreen" class="align-content-center">@item.AddedTime</td>
+                                    <td style="background-color:lawngreen" class="align-content-center">@item.DelivererName</td>
+                                    <td style="background-color:lawngreen" class="align-content-center">@item.RecieverName</td>
+                                    <td style="background-color:lawngreen" class="align-content-center">@item.Quantity @item.StockDetailUnitName</td>
+                                    <td style="background-color:lawngreen" class="align-content-center">@item.ProcessTypeName</td>
+                                    
+                                        total += @item.Quantity;
+                                   
+                            }
+                            else
+                            {
+                                    <td style="background-color:#de6a71" class="align-content-center">@item.AddedTime</td>
+                                    <td style="background-color:#de6a71" class="align-content-center">@item.DelivererName</td>
+
+                                    @if (item.ReceiverId == item.DelivererId)
+                                    {
+                                        <td style="background-color:#de6a71" class="align-content-center">
+                                            
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td style="background-color:#de6a71" class="align-content-center">@item.RecieverName</td>
+                                    }
+
+                                    <td style="background-color:#de6a71" class="align-content-center">@item.Quantity @item.StockDetailUnitName</td>
+                                    <td style="background-color:#de6a71" class="align-content-center">@item.ProcessTypeName</td>
+
+                                    total -= @item.Quantity;
+                            }
+                            </tr>
+                        }
+                            
+                    </tbody>
+                    <!-- tbody end -->
+                    <!-- tfoot start -->
+                    <tfoot>
+                        <tr>
+                            <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> İşlem yapıldı.</td>
+                            <td class="text-start border-0" colspan="2">Stoktaki ürün sayısı : <span id="total-entity" class="badge bg-primary custom-fs-14">@total</span> </td>
+                            <td class="text-end border-0" colspan="4">
+                                <nav class="d-flex justify-content-end">
+                                    <ul class="pagination fw-bold">
+                                        <li class="page-item">
+                                            <button id="first-page" class="page-link text-black">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button id="prev-page" class="page-link text-black">
+                                                <span aria-hidden="true">&lsaquo;</span>
+                                            </button>
+                                        </li>
+                                        <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+                                        <li>
+                                            <button id="next-page" class="page-link text-black">
+                                                <span aria-hidden="true">&rsaquo;</span>
+                                            </button>
+                                        </li>
+                                        <li class="page-item">
+                                            <button id="last-page" class="page-link text-black">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </td>
+                        </tr>
+                    </tfoot>
+                    <!-- tfoot end -->
+                </table>
+                <!-- table end -->
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        var ascending = true;
+        var itemsPerPage = 10;
+        var currentPage = 1;
+        var items = $("#my-table tbody tr");
+        var totalItems = items.length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var colSpanCount = $('#my-table tbody tr:first td').length;
+        var notFoundMessage = `<tr id="not-found" class="border-bottom"><td class="text-danger text-center fs-5" colspan="${colSpanCount}">Üzgünüz, aradığınız veri bulunamadı.</td></tr>`;
+        showPage(1);
+
+        $("#prev-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        $("#first-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            currentPage = 1;
+            showPage(currentPage);
+        });
+
+        $("#next-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        $("#last-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            currentPage = totalPages;
+            showPage(currentPage);
+        });
+
+        $('#my-table-search-input').keyup(function () {
+            $('#not-found').remove();
+            var searchText = $(this).val().toLowerCase();
+            var visibleRows = $('#my-table tbody tr').filter(function () {
+                var rowText = $(this).text().toLowerCase();
+                return rowText.indexOf(searchText) !== -1;
+            });
+            $('#my-table tbody tr').hide();
+            if (visibleRows.length > 0) {
+                visibleRows.show();
+                console.log(visibleRows.length);
+                $('#total-entity').text(visibleRows.length);
+            } else {
+                $('#total-entity').text(0);
+                $('#my-table tbody').append(notFoundMessage);
+            }
+            items = visibleRows;
+            totalItems = items.length;
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages == 0) {
+                totalPages = 1
+            }
+            showPage(1);
+            updateButtons();
+        });
+
+        $('#items-per-page').on('change', function () {
+            var selectedValue = $(this).val();
+            itemsPerPage = selectedValue;
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages == 0) {
+                totalPages = 1
+            }
+            showPage(1);
+            updateButtons();
+        });
+
+        function showPage(page) {
+            $(".page-number").text(currentPage + "/" + totalPages);
+            items.hide();
+            items.slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            updateButtons();
+        }
+
+        function updateButtons() {
+            $("#first-page").toggle(currentPage > 1);
+            $("#prev-page").toggle(currentPage > 1);
+            $("#next-page").toggle(currentPage < totalPages);
+            $("#last-page").toggle(currentPage < totalPages);
+        }
+
+
+    });
+</script>

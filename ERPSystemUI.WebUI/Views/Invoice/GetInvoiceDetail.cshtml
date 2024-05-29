@@ -1,0 +1,192 @@
+﻿@using ERPSystemUI.Model.Model
+@model InvoiceViewModel
+
+@{
+
+    ViewData["Title"] = "Invoice Detail";
+    var invoice = Model.Invoice;
+}
+@{
+    int count = 1;
+    decimal totalPrice = 0;
+    decimal sum = 0;
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+
+    <!-- External CSS libraries -->
+    <link type="text/css" rel="stylesheet" href="~/admin/extrapages/assets/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="~/admin/extrapages/assets/fonts/font-awesome/css/font-awesome.min.css">
+
+    <!-- Favicon icon -->
+    @* <link rel="shortcut icon" href="~/admin/extrapages/main/assets/img/favicon.ico" type="image/x-icon"> *@
+
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900">
+
+    <!-- Custom Stylesheet -->
+    <link href="~/admin/extrapages/main/assets/css/style.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- Invoice 2 start -->
+    <div class="invoice-2 invoice-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="invoice-inner clearfix">
+                        <div class="invoice-info clearfix" id="invoice_wrapper">
+                            <div class="invoice-headar">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div>
+                                            <!-- logo started -->
+                                            <div class="logo">
+                                                <h2 class="text-success">@invoice.SupplierName</h2>
+                                            </div>
+                                            <!-- logo ended -->
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="invoice-id">
+                                            <div class="info">
+                                                <h1 class="inv-header-1 text-success">Fatura</h1>
+                                                <p class="mb-1">Fatura Numarası: <span>@invoice.InvoiceNo</span></p>
+                                                <p class="mb-0">Fatura Tarihi: <span>@invoice.InvoiceDate.Value.ToShortDateString()</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="invoice-top">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="invoice-number mb-30">
+                                            <h4 class="inv-title-1 text-success">Alıcı</h4>
+                                            <h2 class="name">@Model.Invoice.CompanyName</h2>
+                                            <p class="invo-addr-1">
+                                                @Model.Invoice.CompanyMail<br />
+                                                @Model.Invoice.CompanyPhone<br />
+                                                <br />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="invoice-number mb-30">
+                                            <div class="invoice-number-inner">
+                                                <h4 class="inv-title-1 text-success">Satıcı</h4>
+                                                <h2 class="name">@Model.Invoice.SupplierName</h2>
+                                                <p class="invo-addr-1">
+                                                    @Model.Invoice.SupplierPhone  <br />
+                                                    @Model.Invoice.SupplierMail <br />
+                                                    @Model.Invoice.SupplierAddress <br />
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="invoice-center" style="min-height:1025px;">
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-striped invoice-table">
+                                        <thead class="bg-active">
+                                            <tr class="tr">
+                                                <th>No.</th>
+                                                <th class="pl0 text-start">Ürün Adı</th>
+                                                <th class="pl0 text-start">Ürün Açıklama</th>
+                                                <th class="text-center">Fiyat</th>
+                                                <th class="text-center">Miktar</th>
+                                                <th class="text-end">Tutar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var invoiceDetail in invoice.InvoiceDetails)
+                                            {
+
+                                                <tr class="tr">
+                                                    <td>
+                                                        <div class="item-desc-1">
+                                                            <span>@count</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="pl0">@invoiceDetail.ProductName</td>
+                                                    <td class="pl0">@invoiceDetail.ProductDescription</td>
+                                                    <td class="text-center">@invoiceDetail.UnitPrice</td>
+                                                    <td class="text-center">@invoiceDetail.Quantity</td>
+                                                    <td class="text-end">@invoiceDetail.Sum</td>
+                                                </tr>
+                                                sum += invoiceDetail.Sum;
+                                                count++;
+
+                                            }
+                                            <tr class="tr2">
+                                                <td class="f-w-600 active-color text-end" style="color:green !important;" colspan="5">Toplam Fiyat:</td>
+                                                <td class="f-w-600 active-color text-end" style="color:green !important;">@sum</td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            @*                             <div class="invoice-bottom">
+                            <div class="row">
+                            <div class="col-lg-6 col-md-5 col-sm-5">
+                            <div class="payment-method mb-30">
+                            <h3 class="inv-title-1">Payment Method</h3>
+                            <ul class="payment-method-list-1 text-14">
+                            <li><strong>Account No:</strong> 00 123 647 840</li>
+                            <li><strong>Account Name:</strong> Jhon Doe</li>
+                            <li><strong>Branch Name:</strong> xyz</li>
+                            </ul>
+                            </div>
+                            </div>
+                            <div class="col-lg-6 col-md-7 col-sm-7">
+                            <div class="terms-conditions mb-30">
+                            <h3 class="inv-title-1">Terms & Conditions</h3>
+                            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy has</p>
+                            </div>
+                            </div>
+                            </div>
+                            </div> *@
+                            <div class="invoice-contact clearfix" style="background-image:none !important; background-color:seagreen !important;">
+                                <div class="row g-0">
+                                    <div class="col-sm-12">
+                                        <div class="contact-info clearfix">
+                                            <a href="tel:+55-4XX-634-7071" class="d-flex"><i class="fa fa-phone"></i> @Model.Invoice.SupplierPhone</a>
+                                            <a class="d-flex"><i class="fa fa-envelope"></i> @Model.Invoice.SupplierMail</a>
+                                            <a class="mr-0 d-flex d-none-580"><i class="fa fa-map-marker"></i> @Model.Invoice.SupplierAddress</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="invoice-btn-section clearfix d-print-none">
+                            <a href="javascript:window.print()" class="btn btn-lg btn-print">
+                                <i class="fa fa-print"></i> Faturayı Yazdır
+                            </a>
+                            <a id="invoice_download_btn" class="btn btn-lg btn-download btn-theme bg-success">
+                                <i class="fa fa-download"></i> Faturayı İndir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Invoice 2 end -->
+
+    <script src="~/admin/extrapages/main/assets/js/jspdf.min.js"></script>
+    <script src="~/admin/extrapages/main/assets/js/jquery.min.js"></script>
+    <script src="~/admin/extrapages/main/assets/js/html2canvas.js"></script>
+    <script src="~/admin/extrapages/main/assets/js/app.js"></script>
+</body>
+</html>
