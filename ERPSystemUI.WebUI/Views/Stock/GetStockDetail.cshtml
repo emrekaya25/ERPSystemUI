@@ -7,6 +7,7 @@
 }
 @{
     decimal total = 0;
+    decimal totalScrap = 0;
 }
 
 <div class="container">
@@ -142,7 +143,8 @@
                                     <td style="background-color:#de6a71" class="align-content-center">@item.ProcessTypeName</td>
 
                                     total -= @item.Quantity;
-                            }
+                                    totalScrap += item.Quantity;
+                                }
                             </tr>
                         }
                             
@@ -152,7 +154,8 @@
                     <tfoot>
                         <tr>
                             <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> İşlem yapıldı.</td>
-                            <td class="text-start border-0" colspan="2">Stoktaki ürün sayısı : <span id="total-entity" class="badge bg-primary custom-fs-14">@total</span> </td>
+                            <td class="text-start border-0" colspan="1">Stoktaki ürün sayısı : <span id="total-entity" class="badge bg-primary custom-fs-14">@total</span> </td>
+                            <td class="text-start border-0" colspan="1">Hurdaya ayrılmış ürün sayısı : <span id="total-entity" class="badge bg-primary custom-fs-14">@totalScrap</span> </td>
                             <td class="text-end border-0" colspan="4">
                                 <nav class="d-flex justify-content-end">
                                     <ul class="pagination fw-bold">

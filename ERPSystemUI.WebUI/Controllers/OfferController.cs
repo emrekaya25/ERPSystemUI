@@ -7,6 +7,7 @@ using ERPSystemUI.Model.DTO.User;
 using ERPSystemUI.Model.Model;
 using ERPSystemUI.Model.Result;
 using ERPSystemUI.WebUI.ExceptionHelper;
+using ERPSystemUI.WebUI.SessionHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -28,6 +29,10 @@ namespace ERPSystemUI.WebUI.Controllers
         {
             OfferDTO offerDTO = new OfferDTO();
             RequestDTO requestDTO = new RequestDTO();
+            if (!(SessionRole.Roles.Contains("Admin")))
+            {
+                requestDTO.CompanyId = Convert.ToInt64(HttpContext.Session.GetString("CompanyId"));
+            }
             StatusDTO statusDTO = new StatusDTO();
             UserDTO userDTO = new UserDTO();
 
@@ -92,7 +97,6 @@ namespace ERPSystemUI.WebUI.Controllers
             var request = new RestRequest(url, Method.Post);
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + HttpContext.Session.GetString("Token"));
-            requestDTO.StatusId = 2;
             var body = JsonConvert.SerializeObject(requestDTO);
             request.AddBody(body, "application/json");
             RestResponse response = await client.ExecuteAsync(request);
@@ -103,8 +107,17 @@ namespace ERPSystemUI.WebUI.Controllers
             }
 
             var responseObject = JsonConvert.DeserializeObject<ApiResponse<List<RequestDTO>>>(response.Content);
+            
+            var confirmRequestList = new List<RequestDTO>();
+            foreach (var item in responseObject.Data)
+            {
+                if (item.StatusId==2)
+                {
+                    confirmRequestList.Add(item);
+                }
+            }
 
-            return responseObject.Data;
+            return confirmRequestList;
         }
         public async Task<List<OfferDTO>> GetOffers(OfferDTO offerDTO)
         {

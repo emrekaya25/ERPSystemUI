@@ -3,233 +3,259 @@
 @model RequestViewModel
 @inject IHttpContextAccessor Accessor
 @{
-    ViewData["Title"] = "Request";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Request";
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <script src="~/js/request.js"></script>
 @functions {
-    string DecodeHtmlCharacters(string htmlEncodedString)
-    {
-        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
-    }
+	string DecodeHtmlCharacters(string htmlEncodedString)
+	{
+		return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+	}
 }
 @if (TempData["responseRequest"] != null)
 {
-    var x = TempData["responseRequest"].ToString();
-    <script>
-        Swal.fire({
-            title: "Başarılı!",
-            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
-            icon: "success"
-        });
-    </script>
+	var x = TempData["responseRequest"].ToString();
+	<script>
+		Swal.fire({
+			title: "Başarılı!",
+			html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+			icon: "success"
+		});
+	</script>
 }@if (TempData["errorRequest"] != null)
 {
-    var x = TempData["errorRequest"].ToString();
-    <script>
-        Swal.fire({
-            title: "Hata!",
-            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
-            icon: "error"
-        });
-    </script>
+	var x = TempData["errorRequest"].ToString();
+	<script>
+		Swal.fire({
+			title: "Hata!",
+			html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+			icon: "error"
+		});
+	</script>
 }
 
 @{
-    var userId = Convert.ToInt64(Accessor.HttpContext.Session.GetString("UserId"));
+	var userId = Convert.ToInt64(Accessor.HttpContext.Session.GetString("UserId"));
 }
 
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">İstekler</h3>
-        <div class="card-tools col-2">
-            <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#modal-NewRequest">İstek Yap</button>
-        </div>
-        @*         <div class="card-tools col-2">
-        <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#modal-Categories">Kategoriler</button>
-        </div> *@
-    </div>
-    <div class="card-body">
-        <!-- table start -->
-        <table id="my-table" class="table  table-striped table-borderless shadow">
-            <div class="row mb-2">
-                <div class="col-4">
-                    <select class="form-control" id="items-per-page">
-                        <option value="5">Her sayfada 5 istek göster.</option>
-                        <option selected value="10">Her sayfada 10 istek göster.</option>
-                        <option value="25">Her sayfada 25 istek göster.</option>
-                        <option value="50">Her sayfada 50 istek göster.</option>
-                    </select>
-                </div>
-                <div class="col-8">
-                    <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" />
-                </div>
+	<div class="card-header">
+		<h3 class="card-title">İstekler</h3>
+		<div class="card-tools col-2">
+			<button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#modal-NewRequest">İstek Yap</button>
+		</div>
+		@*         <div class="card-tools col-2">
+		<button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#modal-Categories">Kategoriler</button>
+		</div> *@
+	</div>
+	<div class="card-body">
+		<!-- table start -->
+		<table id="my-table" class="table  table-striped table-borderless shadow">
+			<div class="row mb-2">
+				<div class="col-4">
+					<select class="form-control" id="items-per-page">
+						<option value="5">Her sayfada 5 istek göster.</option>
+						<option selected value="10">Her sayfada 10 istek göster.</option>
+						<option value="25">Her sayfada 25 istek göster.</option>
+						<option value="50">Her sayfada 50 istek göster.</option>
+					</select>
+				</div>
+				<div class="col-8">
+					<input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" />
+				</div>
 
-            </div>
-
-
-            <!-- thead start -->
-            <thead>
-
-                <tr class="text-center fs-6 border-bottom">
-                    <th style="max-width: 10px; text-align:start;">#</th>
-                    <th style="text-align:start;">İstek Başlığı</th>
-                    <th style="text-align:start;">Açıklama</th>
-                    <th style="text-align:start;">Ürün Adı</th>
-                    <th style="text-align:start;">Miktar</th>
-                    <th style="text-align:start;">İsteği Yapan</th>
-                    <th style="text-align:start;">Onaylayan/</br>Reddeden</th>
-                    <th style="text-align:start;">İsteğin Durumu</th>
-                    <th style="text-align:start;">İşlemler</th>
-                    <th style="text-align:start;">Sil</th>
-                </tr>
-            </thead>
-            <!-- thead end -->
-            <!-- tbody start -->
-            <tbody>
-                @{
-                    int count = 0;
-                }
-                @foreach (var item in Model.Requests)
-                {
-                    count++;
-                    if (item.StatusId == 2)
-                    {
+			</div>
 
 
-                        <tr class="border-bottom" style="background-color:#a5faad;">
-                            <td>@count</td>
-                            <td>@item.Title</td>
-                            <td>@item.Description</td>
-                            <td>@item.ProductName </td>
-                            <td>@item.Quantity @item.UnitName</td>
-                            <td>@item.RequesterName</td>
-                            <td>@item.ApproverName</td>
-                            <td>@item.StatusName</td>
+			<!-- thead start -->
+			<thead>
+
+				<tr class="text-center fs-6 border-bottom">
+					<th style="max-width: 10px; text-align:start;">#</th>
+					<th style="text-align:start;">İstek Başlığı</th>
+					<th style="text-align:start;">Açıklama</th>
+					<th style="text-align:start;">Ürün Adı</th>
+					<th style="text-align:start;">Miktar</th>
+					<th style="text-align:start;">İsteği Yapan</th>
+					<th style="text-align:start;">Onaylayan/</br>Reddeden</th>
+					<th style="text-align:start;">İsteğin Durumu</th>
+					<th style="text-align:start;">İşlemler</th>
+					<th style="text-align:start;">Sil</th>
+				</tr>
+			</thead>
+			<!-- thead end -->
+			<!-- tbody start -->
+			<tbody>
+				@{
+					int count = 0;
+				}
+				@foreach (var item in Model.Requests)
+				{
+					count++;
+					if (item.StatusId == 2)
+					{
 
 
-                            <td>
-                                @if (!(SessionRole.Roles.Contains("Çalışan")))
-                                {
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            İşlemler
-                                        </button>
-
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-
-                                            @if ((SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür")))
-                                            {
-
-                                                @using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "returnConfirmRequest" }))
-                                                {
-                                                    <input hidden="hidden" value="@item.Id" name="Id" />
-                                                    <input hidden="hidden" value="0" name="ApproverId" />
-                                                    <input hidden="hidden" value="1" name="StatusId" />
-                                                    <input hidden="hidden" value="@item.Title" name="Title" />
-                                                    <input hidden="hidden" value="@item.Description" name="Description" />
-                                                    <input hidden="hidden" value="@item.Quantity" name="Quantity" />
-                                                    <input hidden="hidden" value="@item.UnitId" name="UnitId" />
-                                                    <input hidden="hidden" value="@item.ProductId" name="ProductId" />
-                                                    <input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
-
-                                                    <button id="btnReturnRequest"
-                                                            class="dropdown-item btn ">
-                                                        İşlemi Geri Al
-                                                    </button>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-                                }
-                            </td>
-                            @using (Html.BeginForm("DeleteRequest", "Request", FormMethod.Post, new { id = "deleteRequestForm" }))
-                            {
-
-                                <td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger">Sil</button></td>
-                            }
-
-                        </tr>
-                    }
-                    else if (item.StatusId == 3)
-                    {
-                        <tr class="border-bottom" style="background-color:#f2a0a0;">
-                            <td>@count</td>
-                            <td>@item.Title</td>
-                            <td>@item.Description</td>
-                            <td>@item.ProductName </td>
-                            <td>@item.Quantity @item.UnitName</td>
-                            <td>@item.RequesterName</td>
-                            <td>@item.ApproverName</td>
-                            <td>@item.StatusName</td>
+						<tr class="border-bottom" style="background-color:#a5faad;">
+							<td>@count</td>
+							<td>@item.Title</td>
+							<td>@item.Description</td>
+							<td>@item.ProductName </td>
+							<td>@item.Quantity @item.UnitName</td>
+							<td>@item.RequesterName</td>
+							<td>@item.ApproverName</td>
+							<td>@item.StatusName</td>
 
 
-                            <td>
+							<td>
+								@if (!(SessionRole.Roles.Contains("Çalışan")))
+								{
+									<div class="dropdown">
+										<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											İşlemler
+										</button>
 
-                                @if (!(SessionRole.Roles.Contains("Çalışan")))
-                                {
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            İşlemler
-                                        </button>
+										<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+											@if ((SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür")))
+											{
 
-                                            @if ((SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür")))
-                                            {
+												@using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "returnConfirmRequest" }))
+												{
+													<input hidden="hidden" value="@item.Id" name="Id" />
+													<input hidden="hidden" value="0" name="ApproverId" />
+													<input hidden="hidden" value="1" name="StatusId" />
+													<input hidden="hidden" value="@item.Title" name="Title" />
+													<input hidden="hidden" value="@item.Description" name="Description" />
+													<input hidden="hidden" value="@item.Quantity" name="Quantity" />
+													<input hidden="hidden" value="@item.UnitId" name="UnitId" />
+													<input hidden="hidden" value="@item.ProductId" name="ProductId" />
+													<input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
 
-                                                @using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "returnConfirmRequest" }))
-                                                {
-                                                    <input hidden="hidden" value="@item.Id" name="Id" />
-                                                    <input hidden="hidden" value="0" name="ApproverId" />
-                                                    <input hidden="hidden" value="1" name="StatusId" />
-                                                    <input hidden="hidden" value="@item.Title" name="Title" />
-                                                    <input hidden="hidden" value="@item.Description" name="Description" />
-                                                    <input hidden="hidden" value="@item.Quantity" name="Quantity" />
-                                                    <input hidden="hidden" value="@item.UnitId" name="UnitId" />
-                                                    <input hidden="hidden" value="@item.ProductId" name="ProductId" />
-                                                    <input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
+													<button id="btnReturnRequest"
+															class="dropdown-item btn ">
+														İşlemi Geri Al
+													</button>
+												}
+											}
+										</div>
+									</div>
+								}
+								else
+								{
+									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+										İşlemler
+									</button>
+								}
+							</td>
+							@using (Html.BeginForm("DeleteRequest", "Request", FormMethod.Post, new { id = "deleteRequestForm" }))
+							{
+								if (!(SessionRole.Roles.Contains("Çalışan")))
+								{
+									<td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger">Sil</button></td>
+								}
+								else
+								{
+									<td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger" disabled>Sil</button></td>
+								}
 
-                                                    <button id="btnReturnRequest"
-                                                            class="dropdown-item btn ">
-                                                        İşlemi Geri Al
-                                                    </button>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-                                }
-                            </td>
-                            @using (Html.BeginForm("DeleteRequest", "Request", FormMethod.Post, new { id = "deleteRequestForm" }))
-                            {
+							}
 
-                                <td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger">Sil</button></td>
-                            }
-
-                        </tr>
-                    }
-                    else
-                    {
-                        <tr class="border-bottom">
-                            <td>@count</td>
-                            <td>@item.Title</td>
-                            <td>@item.Description</td>
-                            <td>@item.ProductName </td>
-                            <td>@item.Quantity @item.UnitName</td>
-                            <td>@item.RequesterName</td>
-                            <td>@item.ApproverName</td>
-                            <td>@item.StatusName</td>
+						</tr>
+					}
+					else if (item.StatusId == 3)
+					{
+						<tr class="border-bottom" style="background-color:#f2a0a0;">
+							<td>@count</td>
+							<td>@item.Title</td>
+							<td>@item.Description</td>
+							<td>@item.ProductName </td>
+							<td>@item.Quantity @item.UnitName</td>
+							<td>@item.RequesterName</td>
+							<td>@item.ApproverName</td>
+							<td>@item.StatusName</td>
 
 
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        İşlemler
-                                    </button>
+							<td>
 
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <button id="btnUpdateRequest"
-                                                onclick='openRequestDetailModal(
+								@if (!(SessionRole.Roles.Contains("Çalışan")))
+								{
+									<div class="dropdown">
+										<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											İşlemler
+										</button>
+
+										<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+											@if ((SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür")))
+											{
+
+												@using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "returnConfirmRequest" }))
+												{
+													<input hidden="hidden" value="@item.Id" name="Id" />
+													<input hidden="hidden" value="0" name="ApproverId" />
+													<input hidden="hidden" value="1" name="StatusId" />
+													<input hidden="hidden" value="@item.Title" name="Title" />
+													<input hidden="hidden" value="@item.Description" name="Description" />
+													<input hidden="hidden" value="@item.Quantity" name="Quantity" />
+													<input hidden="hidden" value="@item.UnitId" name="UnitId" />
+													<input hidden="hidden" value="@item.ProductId" name="ProductId" />
+													<input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
+
+													<button id="btnReturnRequest"
+															class="dropdown-item btn ">
+														İşlemi Geri Al
+													</button>
+												}
+											}
+										</div>
+									</div>
+								}
+								else
+								{
+									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+										İşlemler
+									</button>
+								}
+							</td>
+							@using (Html.BeginForm("DeleteRequest", "Request", FormMethod.Post, new { id = "deleteRequestForm" }))
+							{
+
+								if (!(SessionRole.Roles.Contains("Çalışan")))
+								{
+									<td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger">Sil</button></td>
+								}
+								else
+								{
+									<td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger" disabled>Sil</button></td>
+								}
+							}
+
+						</tr>
+					}
+					else
+					{
+						<tr class="border-bottom">
+							<td>@count</td>
+							<td>@item.Title</td>
+							<td>@item.Description</td>
+							<td>@item.ProductName </td>
+							<td>@item.Quantity @item.UnitName</td>
+							<td>@item.RequesterName</td>
+							<td>@item.ApproverName</td>
+							<td>@item.StatusName</td>
+
+
+							<td>
+								<div class="dropdown">
+									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										İşlemler
+									</button>
+
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+										<button id="btnUpdateRequest"
+												onclick='openRequestDetailModal(
 										"@item.Id",
 										"@item.Title",
                                         "@item.Description",
@@ -239,283 +265,290 @@
                                         "@item.RequesterId",
                                         "@item.ApproverId",
                                         "@item.StatusId")' class="dropdown-item btn ">
-                                            Güncelle
-                                        </button>
+											Güncelle
+										</button>
 
-                                        @if ((SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür")))
-                                        {
+										@if ((SessionRole.Roles.Contains("Admin") || SessionRole.Roles.Contains("Müdür")))
+										{
 
 
 
-                                            @using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "updateConfirmRequest" }))
-                                            {
-                                                <input hidden="hidden" value="@item.Id" name="Id" />
-                                                <input hidden="hidden" value="@userId" name="ApproverId" />
-                                                <input hidden="hidden" value="2" name="StatusId" />
-                                                <input hidden="hidden" value="@item.Title" name="Title" />
-                                                <input hidden="hidden" value="@item.Description" name="Description" />
-                                                <input hidden="hidden" value="@item.Quantity" name="Quantity" />
-                                                <input hidden="hidden" value="@item.UnitId" name="UnitId" />
-                                                <input hidden="hidden" value="@item.ProductId" name="ProductId" />
-                                                <input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
+											@using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "updateConfirmRequest" }))
+											{
+												<input hidden="hidden" value="@item.Id" name="Id" />
+												<input hidden="hidden" value="@userId" name="ApproverId" />
+												<input hidden="hidden" value="2" name="StatusId" />
+												<input hidden="hidden" value="@item.Title" name="Title" />
+												<input hidden="hidden" value="@item.Description" name="Description" />
+												<input hidden="hidden" value="@item.Quantity" name="Quantity" />
+												<input hidden="hidden" value="@item.UnitId" name="UnitId" />
+												<input hidden="hidden" value="@item.ProductId" name="ProductId" />
+												<input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
 
-                                                <button id="btnConfirmRequest"
-                                                        class="dropdown-item btn ">
-                                                    Onayla
-                                                </button>
-                                            }
+												<button id="btnConfirmRequest"
+														class="dropdown-item btn ">
+													Onayla
+												</button>
+											}
 
-                                            @using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "rejectConfirmRequest" }))
-                                            {
-                                                <input hidden="hidden" value="@item.Id" name="Id" />
-                                                <input hidden="hidden" value="@userId" name="ApproverId" />
-                                                <input hidden="hidden" value="3" name="StatusId" />
-                                                <input hidden="hidden" value="@item.Title" name="Title" />
-                                                <input hidden="hidden" value="@item.Description" name="Description" />
-                                                <input hidden="hidden" value="@item.Quantity" name="Quantity" />
-                                                <input hidden="hidden" value="@item.UnitId" name="UnitId" />
-                                                <input hidden="hidden" value="@item.ProductId" name="ProductId" />
-                                                <input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
+											@using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "rejectConfirmRequest" }))
+											{
+												<input hidden="hidden" value="@item.Id" name="Id" />
+												<input hidden="hidden" value="@userId" name="ApproverId" />
+												<input hidden="hidden" value="3" name="StatusId" />
+												<input hidden="hidden" value="@item.Title" name="Title" />
+												<input hidden="hidden" value="@item.Description" name="Description" />
+												<input hidden="hidden" value="@item.Quantity" name="Quantity" />
+												<input hidden="hidden" value="@item.UnitId" name="UnitId" />
+												<input hidden="hidden" value="@item.ProductId" name="ProductId" />
+												<input hidden="hidden" value="@item.RequesterId" name="RequesterId" />
 
-                                                <button id="btnConfirmRequest"
-                                                        class="dropdown-item btn ">
-                                                    Reddet
-                                                </button>
-                                            }
-                                        }
-                                    </div>
-                                </div>
-                            </td>
-                            @using (Html.BeginForm("DeleteRequest", "Request", FormMethod.Post, new { id = "deleteRequestForm" }))
-                            {
+												<button id="btnConfirmRequest"
+														class="dropdown-item btn ">
+													Reddet
+												</button>
+											}
+										}
+									</div>
+								</div>
+							</td>
+							@using (Html.BeginForm("DeleteRequest", "Request", FormMethod.Post, new { id = "deleteRequestForm" }))
+							{
 
-                                <td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger">Sil</button></td>
-                            }
+								if (!(SessionRole.Roles.Contains("Çalışan")))
+								{
+									<td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger">Sil</button></td>
+								}
+								else
+								{
+									<td><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteRequest" type="submit" class="btn btn-danger" disabled>Sil</button></td>
+								}
+							}
 
-                        </tr>
-                    }
-                }
-            </tbody>
-            <!-- tbody end -->
-            <!-- tfoot start -->
-            <tfoot>
-                <tr>
-                    <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> İstek</td>
-                    <td class="text-end border-0" colspan="7">
-                        <nav class="d-flex justify-content-end">
-                            <ul class="pagination fw-bold">
-                                <li class="page-item">
-                                    <button id="first-page" class="page-link text-black">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button id="prev-page" class="page-link text-black">
-                                        <span aria-hidden="true">&lsaquo;</span>
-                                    </button>
-                                </li>
-                                <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
-                                <li>
-                                    <button id="next-page" class="page-link text-black">
-                                        <span aria-hidden="true">&rsaquo;</span>
-                                    </button>
-                                </li>
-                                <li class="page-item">
-                                    <button id="last-page" class="page-link text-black">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </nav>
-                    </td>
-                </tr>
-            </tfoot>
-            <!-- tfoot end -->
-        </table>
-        <!-- table end -->
-    </div>
+						</tr>
+					}
+				}
+			</tbody>
+			<!-- tbody end -->
+			<!-- tfoot start -->
+			<tfoot>
+				<tr>
+					<td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> İstek</td>
+					<td class="text-end border-0" colspan="7">
+						<nav class="d-flex justify-content-end">
+							<ul class="pagination fw-bold">
+								<li class="page-item">
+									<button id="first-page" class="page-link text-black">
+										<span aria-hidden="true">&laquo;</span>
+									</button>
+								</li>
+								<li>
+									<button id="prev-page" class="page-link text-black">
+										<span aria-hidden="true">&lsaquo;</span>
+									</button>
+								</li>
+								<li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+								<li>
+									<button id="next-page" class="page-link text-black">
+										<span aria-hidden="true">&rsaquo;</span>
+									</button>
+								</li>
+								<li class="page-item">
+									<button id="last-page" class="page-link text-black">
+										<span aria-hidden="true">&raquo;</span>
+									</button>
+								</li>
+							</ul>
+						</nav>
+					</td>
+				</tr>
+			</tfoot>
+			<!-- tfoot end -->
+		</table>
+		<!-- table end -->
+	</div>
 
 
 </div>
 
 <div class="modal fade" id="modal-NewRequest">
-    <div class="modal-dialog modal-NewRequest">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Yeni İstek</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            @{
+	<div class="modal-dialog modal-NewRequest">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Yeni İstek</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			@{
 
 
-                using (Html.BeginForm("AddRequest", "Request", FormMethod.Post, new { id = "addRequestForm" }))
-                {
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="txtRequestTitle_Add">İstek Başlığı</label>
-                            <input name="Title" type="text" class="form-control" id="txtRequestTitle_Add">
-                        </div>
-                        <div class="form-group">
-                            <label for="txtRequestDescription_Add">Açıklama</label>
-                            <textarea style="max-height:74px;" name="Description" type="text" class="form-control" id="txtRequestDescription_Add"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="txtRequestQuantity_Add">Miktar</label>
-                            <input name="Quantity" type="number" min="0" class="form-control" id="txtRequestQuantity_Add">
-                        </div>
-                        <div class="form-group">
-                            <label for="ddlRequestUnit_Add">Birim</label>
-                            <select name="UnitId" class="custom-select rounded-0" id="ddlRequestUnit_Add">
-                                <option value=""> Birim Seçiniz...</option>
-                                @{
-                                    for (int i = 0; i < Model.Units.Count; i++)
-                                    {
-                                        <option value="@Model.Units[i].Id">@Model.Units[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="ddlRequestProduct_Add">Ürün</label>
-                            <select name="ProductId" class="custom-select rounded-0" id="ddlRequestProduct_Add">
-                                <option value=""> Ürün Seçiniz...</option>
-                                @{
-                                    for (int i = 0; i < Model.Products.Count; i++)
-                                    {
-                                        <option value="@Model.Products[i].Id">@Model.Products[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <!-- Hidden fields -->
-                        <div hidden="hidden" class="form-group">
-                            <label for="ddlRequestRequester_Add">İstek Yapan Kişi</label>
-                            <select name="RequesterId" class="custom-select rounded-0" id="ddlRequestRequester_Add">
-                                <option value="@userId"></option>
-                            </select>
-                        </div>
-                        <div hidden="hidden" class="form-group">
-                            <label for="ddlRequestApprover_Add">Onaylayan Kişi</label>
-                            <select name="ApproverId" class="custom-select rounded-0" id="ddlRequestApprover_Add">
-                            </select>
-                        </div>
-                        <div hidden="hidden" class="form-group">
-                            <label for="ddlRequestStatus_Add">Durum</label>
-                            <select name="StatusId" class="custom-select rounded-0" id="ddlRequestStatus_Add">
-                                @{
-                                    for (int i = 0; i < Model.Statuses.Count; i++)
-                                    {
-                                        <option value="1">@Model.Statuses[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
-                        <button type="submit" class="btn btn-primary" id="btnAddRequest">Kaydet</button>
-                    </div>
+				using (Html.BeginForm("AddRequest", "Request", FormMethod.Post, new { id = "addRequestForm" }))
+				{
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="txtRequestTitle_Add">İstek Başlığı</label>
+							<input name="Title" type="text" class="form-control" id="txtRequestTitle_Add">
+						</div>
+						<div class="form-group">
+							<label for="txtRequestDescription_Add">Açıklama</label>
+							<textarea style="max-height:74px;" name="Description" type="text" class="form-control" id="txtRequestDescription_Add"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="txtRequestQuantity_Add">Miktar</label>
+							<input name="Quantity" type="number" min="0" class="form-control" id="txtRequestQuantity_Add">
+						</div>
+						<div class="form-group">
+							<label for="ddlRequestUnit_Add">Birim</label>
+							<select name="UnitId" class="custom-select rounded-0" id="ddlRequestUnit_Add">
+								<option value=""> Birim Seçiniz...</option>
+								@{
+									for (int i = 0; i < Model.Units.Count; i++)
+									{
+										<option value="@Model.Units[i].Id">@Model.Units[i].Name</option>
+									}
+								}
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="ddlRequestProduct_Add">Ürün</label>
+							<select name="ProductId" class="custom-select rounded-0" id="ddlRequestProduct_Add">
+								<option value=""> Ürün Seçiniz...</option>
+								@{
+									for (int i = 0; i < Model.Products.Count; i++)
+									{
+										<option value="@Model.Products[i].Id">@Model.Products[i].Name</option>
+									}
+								}
+							</select>
+						</div>
+						<!-- Hidden fields -->
+						<div hidden="hidden" class="form-group">
+							<label for="ddlRequestRequester_Add">İstek Yapan Kişi</label>
+							<select name="RequesterId" class="custom-select rounded-0" id="ddlRequestRequester_Add">
+								<option value="@userId"></option>
+							</select>
+						</div>
+						<div hidden="hidden" class="form-group">
+							<label for="ddlRequestApprover_Add">Onaylayan Kişi</label>
+							<select name="ApproverId" class="custom-select rounded-0" id="ddlRequestApprover_Add">
+							</select>
+						</div>
+						<div hidden="hidden" class="form-group">
+							<label for="ddlRequestStatus_Add">Durum</label>
+							<select name="StatusId" class="custom-select rounded-0" id="ddlRequestStatus_Add">
+								@{
+									for (int i = 0; i < Model.Statuses.Count; i++)
+									{
+										<option value="1">@Model.Statuses[i].Name</option>
+									}
+								}
+							</select>
+						</div>
+					</div>
+					<div class="modal-footer justify-content-between">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+						<button type="submit" class="btn btn-primary" id="btnAddRequest">Kaydet</button>
+					</div>
 
-                }
+				}
 
 
 
-            }
-        </div>
+			}
+		</div>
 
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
 </div>
 
 <div class="modal fade" id="modal-RequestDetail">
-    <div class="modal-dialog modal-RequestDetail">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">İstek Güncelle</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            @{
+	<div class="modal-dialog modal-RequestDetail">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">İstek Güncelle</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			@{
 
 
-                using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "btnUpdateRequest" }))
-                {
-                    <div class="modal-body">
-                        <input name="Id" hidden="hidden" type="text" class="form-control" id="txtRequestId_Update">
-                        <div class="form-group">
-                            <label for="txtRequestTitle_Update">İstek Başlığı</label>
-                            <input name="Title" type="text" class="form-control" id="txtRequestTitle_Update">
-                        </div>
-                        <div class="form-group">
-                            <label for="txtRequestDescription_Update">Açıklama</label>
-                            <textarea style="max-height:74px;" name="Description" type="text" class="form-control" id="txtRequestDescription_Update"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="txtRequestQuantity_Update">Miktar</label>
-                            <input name="Quantity" class="form-control" type="number" min="0" id="txtRequestQuantity_Update">
-                        </div>
-                        <div class="form-group">
-                            <label for="ddlRequestUnit_Update">Birim</label>
-                            <select name="UnitId" class="custom-select rounded-0" id="ddlRequestUnit_Update">
-                                <option value=""> Birim Seçiniz...</option>
-                                @{
-                                    for (int i = 0; i < Model.Units.Count; i++)
-                                    {
-                                        <option value="@Model.Units[i].Id">@Model.Units[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="ddlRequestProduct_Update">Ürün</label>
-                            <select name="ProductId" class="custom-select rounded-0" id="ddlRequestProduct_Update">
-                                <option value=""> Ürün Seçiniz...</option>
-                                @{
-                                    for (int i = 0; i < Model.Products.Count; i++)
-                                    {
-                                        <option value="@Model.Products[i].Id">@Model.Products[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div hidden="hidden" class="form-group">
-                            <label for="ddlRequestRequester_Update">İstek Yapan Kişi</label>
-                            <input name="RequesterId" type="text" class="custom-select rounded-0" id="ddlRequestRequester_Update">
-                        </div>
-                        <div hidden="hidden" class="form-group">
-                            <label for="ddlRequestApprover_Update">Onaylayan Kişi</label>
-                            <select name="ApproverId" class="custom-select rounded-0" id="ddlRequestApprover_Update">
-                            </select>
-                        </div>
-                        <div hidden="hidden" class="form-group">
-                            <label for="ddlRequestStatus_Update">Durum</label>
-                            <select name="StatusId" class="custom-select rounded-0" id="ddlRequestStatus_Update">
-                                @{
-                                    for (int i = 0; i < Model.Statuses.Count; i++)
-                                    {
-                                        <option value="@Model.Statuses[i].Id">@Model.Statuses[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
-                        <button type="submit" class="btn btn-primary" id="btnUpdateRequestden">Kaydet</button>
-                    </div>
-                }
-            }
-        </div>
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
+				using (Html.BeginForm("UpdateRequest", "Request", FormMethod.Post, new { id = "btnUpdateRequest" }))
+				{
+					<div class="modal-body">
+						<input name="Id" hidden="hidden" type="text" class="form-control" id="txtRequestId_Update">
+						<div class="form-group">
+							<label for="txtRequestTitle_Update">İstek Başlığı</label>
+							<input name="Title" type="text" class="form-control" id="txtRequestTitle_Update">
+						</div>
+						<div class="form-group">
+							<label for="txtRequestDescription_Update">Açıklama</label>
+							<textarea style="max-height:74px;" name="Description" type="text" class="form-control" id="txtRequestDescription_Update"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="txtRequestQuantity_Update">Miktar</label>
+							<input name="Quantity" class="form-control" type="number" min="0" id="txtRequestQuantity_Update">
+						</div>
+						<div class="form-group">
+							<label for="ddlRequestUnit_Update">Birim</label>
+							<select name="UnitId" class="custom-select rounded-0" id="ddlRequestUnit_Update">
+								<option value=""> Birim Seçiniz...</option>
+								@{
+									for (int i = 0; i < Model.Units.Count; i++)
+									{
+										<option value="@Model.Units[i].Id">@Model.Units[i].Name</option>
+									}
+								}
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="ddlRequestProduct_Update">Ürün</label>
+							<select name="ProductId" class="custom-select rounded-0" id="ddlRequestProduct_Update">
+								<option value=""> Ürün Seçiniz...</option>
+								@{
+									for (int i = 0; i < Model.Products.Count; i++)
+									{
+										<option value="@Model.Products[i].Id">@Model.Products[i].Name</option>
+									}
+								}
+							</select>
+						</div>
+						<div hidden="hidden" class="form-group">
+							<label for="ddlRequestRequester_Update">İstek Yapan Kişi</label>
+							<input name="RequesterId" type="text" class="custom-select rounded-0" id="ddlRequestRequester_Update">
+						</div>
+						<div hidden="hidden" class="form-group">
+							<label for="ddlRequestApprover_Update">Onaylayan Kişi</label>
+							<select name="ApproverId" class="custom-select rounded-0" id="ddlRequestApprover_Update">
+							</select>
+						</div>
+						<div hidden="hidden" class="form-group">
+							<label for="ddlRequestStatus_Update">Durum</label>
+							<select name="StatusId" class="custom-select rounded-0" id="ddlRequestStatus_Update">
+								@{
+									for (int i = 0; i < Model.Statuses.Count; i++)
+									{
+										<option value="@Model.Statuses[i].Id">@Model.Statuses[i].Name</option>
+									}
+								}
+							</select>
+						</div>
+					</div>
+					<div class="modal-footer justify-content-between">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+						<button type="submit" class="btn btn-primary" id="btnUpdateRequestden">Kaydet</button>
+					</div>
+				}
+			}
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
 </div>
 <style>
-    .dropdown-toggle {
-        background-color: #0c6e4b !important;
-    }
+	.dropdown-toggle {
+		background-color: #0c6e4b !important;
+	}
 </style>

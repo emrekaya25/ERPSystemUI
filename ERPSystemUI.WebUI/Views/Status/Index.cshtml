@@ -1,0 +1,328 @@
+﻿@using ERPSystemUI.Model.Model
+@model StatusViewModel
+
+@{
+    ViewData["Title"] = "Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Durumlar</h3>
+        <div class="card-tools col-2">
+            <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#modal-NewStatus">Ekle</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- table start -->
+        <div class="row mb-2">
+            <div class="col-4">
+                <select class="form-control" id="items-per-page">
+                    <option value="5">Her sayfada 5 durum göster.</option>
+                    <option selected value="10">Her sayfada 10 durum göster.</option>
+                    <option value="25">Her sayfada 25 durum göster.</option>
+                    <option value="50">Her sayfada 50 durum göster.</option>
+                </select>
+            </div>
+            <div class="col-8"> <input type="text" id="my-table-search-input" class="form-control" placeholder="Ara..." autocomplete="off" /></div>
+        </div>
+        <table id="my-table" class="table  table-striped table-borderless shadow">
+            <!-- thead start -->
+            <thead>
+                <tr class="text-center fs-6 border-bottom">
+                    <th style="text-align:start;">#</th>
+                    <th style="text-align:start;">Durum</th>
+                    <th style="text-align:start;">Güncelle</th>
+                    <th style="text-align:start;">Sil</th>
+                </tr>
+            </thead>
+            <!-- thead end -->
+            <!-- tbody start -->
+            <tbody>
+                @{
+                    int count = 0;
+                }
+                @foreach (var item in Model.Statuses)
+                {
+                    count++;
+                    <tr class="border-bottom">
+                        <td class="align-content-center">@item.Id</td>
+                        <td class="align-content-center">@item.Name</td>
+                        <td class="align-content-center">
+                            <button id="btnUpdateStatus"
+                                    onclick='openStatusDetailModal("@item.Id","@item.Name")' class="btn bg-gradient-cyan">
+                                Güncelle
+                            </button>
+                        </td>
+                        @using (Html.BeginForm("DeleteStatus", "Status", FormMethod.Post, new { id = "deleteStatusForm" }))
+                        {
+                            if (item.Id <= 3)
+                            {
+                                <td class="align-content-center"><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteStatus" type="submit" class="btn btn-danger" disabled>Sil</button></td>
+                            }
+                            else
+                            {
+                                <td class="align-content-center"><input name="Id" hidden="hidden" value="@item.Id" /><button id="btnDeleteStatus" type="submit" class="btn btn-danger">Sil</button></td>
+                            }
+                            
+                        }
+
+                    </tr>
+
+                }
+            </tbody>
+            <!-- tbody end -->
+            <!-- tfoot start -->
+            <tfoot>
+                <tr>
+                    <td class="text-start border-0" colspan="2">Toplam <span id="total-entity" class="badge bg-primary custom-fs-14">@count</span> Durum</td>
+                    <td class="text-end border-0" colspan="4">
+                        <nav class="d-flex justify-content-end">
+                            <ul class="pagination fw-bold">
+                                <li class="page-item">
+                                    <button id="first-page" class="page-link text-black">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button id="prev-page" class="page-link text-black">
+                                        <span aria-hidden="true">&lsaquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item active"><button class="page-link page-number text-white fw-bold">1</button></li>
+                                <li>
+                                    <button id="next-page" class="page-link text-black">
+                                        <span aria-hidden="true">&rsaquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item">
+                                    <button id="last-page" class="page-link text-black">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </td>
+                </tr>
+            </tfoot>
+            <!-- tfoot end -->
+        </table>
+        <!-- table end -->
+    </div>
+
+
+</div>
+
+<div class="modal fade" id="modal-NewStatus">
+    <div class="modal-dialog modal-NewStatus">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Yeni Durum</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("AddStatus", "Status", FormMethod.Post, new { id = "addStatusForm", enctype = "multipart/form-data" }))
+                {
+                    <div class="modal-body">
+
+
+                        <div class="form-group">
+                            <label for="txtStatusName_Add">Durum Adı</label>
+                            <input name="Name" type="text" class="form-control" id="txtProductName_Add">
+                            @*<div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>*@
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddStatus">Kaydet</button>
+                    </div>
+                }
+
+
+
+            }
+        </div>
+
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-StatusDetail">
+    <div class="modal-dialog modal-StatusDetail">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Durum Güncelle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @{
+
+
+                using (Html.BeginForm("UpdateStatus", "Status", FormMethod.Post, new { id = "btnUpdateStatus", enctype = "multipart/form-data" }))
+                {
+                    <div class="modal-body">
+
+                        <input name="Id" hidden="hidden" type="text" class="form-control" id="txtStatusId_Update">
+                        <div class="form-group">
+                            <label for="txtStatusName_Update">Durum Adı</label>
+                            <input name="Name" type="text" class="form-control" id="txtStatusName_Update">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateStatus">Güncelle</button>
+                    </div>
+                }
+            }
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@functions {
+    string DecodeHtmlCharacters(string htmlEncodedString)
+    {
+        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+    }
+}
+@if (TempData["responseStatus"] != null)
+{
+    var x = TempData["responseStatus"].ToString();
+    <script>
+        Swal.fire({
+            title: "Başarılı!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "success"
+        });
+    </script>
+}
+@if (TempData["errorStatus"] != null)
+{
+    var x = TempData["errorStatus"].ToString();
+    <script>
+        Swal.fire({
+            title: "Hata!",
+            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+            icon: "error"
+        });
+    </script>
+}
+
+<script>
+    function openStatusDetailModal(id, name) {
+        $("#modal-StatusDetail").modal("show");
+        $("#txtStatusId_Update").val(id);
+        $("#txtStatusName_Update").val(name);
+    }
+    $(document).ready(function () {
+        var ascending = true;
+        var itemsPerPage = 10;
+        var currentPage = 1;
+        var items = $("#my-table tbody tr");
+        var totalItems = items.length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var colSpanCount = $('#my-table tbody tr:first td').length;
+        var notFoundMessage = `<tr id="not-found" class="border-bottom"><td class="text-danger text-center fs-5" colspan="${colSpanCount}">Üzgünüz, aradığınız veri bulunamadı.</td></tr>`;
+        showPage(1);
+
+        $("#prev-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        $("#first-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            currentPage = 1;
+            showPage(currentPage);
+        });
+
+        $("#next-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        $("#last-page").click(function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            currentPage = totalPages;
+            showPage(currentPage);
+        });
+
+        $('#my-table-search-input').keyup(function () {
+            $('#not-found').remove();
+            var searchText = $(this).val().toLowerCase();
+            var visibleRows = $('#my-table tbody tr').filter(function () {
+                var rowText = $(this).text().toLowerCase();
+                return rowText.indexOf(searchText) !== -1;
+            });
+            $('#my-table tbody tr').hide();
+            if (visibleRows.length > 0) {
+                visibleRows.show();
+                console.log(visibleRows.length);
+                $('#total-entity').text(visibleRows.length);
+            } else {
+                $('#total-entity').text(0);
+                $('#my-table tbody').append(notFoundMessage);
+            }
+            items = visibleRows;
+            totalItems = items.length;
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages == 0) {
+                totalPages = 1
+            }
+            showPage(1);
+            updateButtons();
+        });
+
+        $('#items-per-page').on('change', function () {
+            var selectedValue = $(this).val();
+            itemsPerPage = selectedValue;
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages == 0) {
+                totalPages = 1
+            }
+            showPage(1);
+            updateButtons();
+        });
+
+        function showPage(page) {
+            $(".page-number").text(currentPage + "/" + totalPages);
+            items.hide();
+            items.slice((page - 1) * itemsPerPage, page * itemsPerPage).show();
+            updateButtons();
+        }
+
+        function updateButtons() {
+            $("#first-page").toggle(currentPage > 1);
+            $("#prev-page").toggle(currentPage > 1);
+            $("#next-page").toggle(currentPage < totalPages);
+            $("#last-page").toggle(currentPage < totalPages);
+        }
+    });
+</script>
