@@ -3,6 +3,7 @@ using ERPSystemUI.Model.DTO.Invoice;
 using ERPSystemUI.Model.Model;
 using ERPSystemUI.Model.Result;
 using ERPSystemUI.WebUI.ExceptionHelper;
+using ERPSystemUI.WebUI.SessionHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Differencing;
 using Newtonsoft.Json;
@@ -95,9 +96,24 @@ namespace ERPSystemUI.WebUI.Controllers
 
                     var responseObject = JsonConvert.DeserializeObject<ApiResponse<List<InvoiceDTO>>>(response.Content);
 
-                    return responseObject.Data;
-                }
+                    // giriş yapan kullanıcının şirketine göre çekme yeri
+                    if (!(SessionRole.Roles.Contains("Admin")))
+                    {
+                        List<InvoiceDTO> invoices = new List<InvoiceDTO>();
 
+                        foreach (var item in responseObject.Data)
+                        {
+                            if (item.CompanyId == Convert.ToInt64(HttpContext.Session.GetString("CompanyId")))
+                            {
+                                invoices.Add(item);
+                            }
+                        }
+                        return invoices;
+                    }
+
+                    return responseObject.Data;
+
+                }
 
             }
 

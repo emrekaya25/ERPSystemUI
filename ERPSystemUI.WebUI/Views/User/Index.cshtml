@@ -1,85 +1,87 @@
 ﻿@using ERPSystemUI.Model.Model
+@using ERPSystemUI.WebUI.SessionHelper
+@inject IHttpContextAccessor Accessor
 @model UserViewModel
 @{
-    ViewData["Title"] = "Users";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Users";
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <script src="~/js/user.js"></script>
 @functions {
-    string DecodeHtmlCharacters(string htmlEncodedString)
-    {
-        return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
-    }
+	string DecodeHtmlCharacters(string htmlEncodedString)
+	{
+		return System.Net.WebUtility.HtmlDecode(htmlEncodedString);
+	}
 }
 @if (TempData["responseUser"] != null)
 {
-    var x = TempData["responseUser"].ToString();
-    <script>
-        Swal.fire({
-            title: "Başarılı!",
-            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
-            icon: "success"
-        });
-    </script>
+	var x = TempData["responseUser"].ToString();
+	<script>
+		Swal.fire({
+			title: "Başarılı!",
+			html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+			icon: "success"
+		});
+	</script>
 }
 @if (TempData["errorUser"] != null)
 {
-    var x = TempData["errorUser"].ToString();
-    <script>
-        
-        Swal.fire({
-            title: "Hata!",
-            html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
-            icon: "error"
-        });
-    </script>
+	var x = TempData["errorUser"].ToString();
+	<script>
+
+		Swal.fire({
+			title: "Hata!",
+			html: "@Html.Raw(DecodeHtmlCharacters(x.Replace("-", "</br>")))",
+			icon: "error"
+		});
+	</script>
 }
 
 
 <div class="row mb-3">
-    <div class="col-md-9">
-        <input type="text" id="ara" class="form-control" placeholder="Kullanıcı ara...">
-    </div>
-    <div class="col-md-3">
-        <button type="button" class="btn btn-success col-md-12" data-toggle="modal" data-target="#modal-NewUser">Ekle</button>
-    </div>
+	<div class="col-md-9">
+		<input type="text" id="ara" class="form-control" placeholder="Kullanıcı ara...">
+	</div>
+	<div class="col-md-3">
+		<button type="button" class="btn btn-success col-md-12" data-toggle="modal" data-target="#modal-NewUser">Ekle</button>
+	</div>
 </div>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 " id="AranacakZimbirti">
 
 
 
-    @foreach (var item in Model.Users)
-    {
-        <div class="col mb-3 arama" >
-            <div class="card h-100" style="display:flex !important;flex-direction:column !important;" id="cardDark">
-                <div class="p-3 card-img-top">
-                    <img height="250" width="100%" src="data:image/jpeg;base64,@item.Image" alt="@item.Name" />
+	@foreach (var item in Model.Users)
+	{
+		<div class="col mb-3 arama">
+			<div class="card h-100" style="display:flex !important;flex-direction:column !important;" id="cardDark">
+				<div class="p-3 card-img-top">
+					<img height="250" width="100%" src="data:image/jpeg;base64,@item.Image" alt="@item.Name" />
 
-                </div>
+				</div>
 
-                <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <h1 class="card-title font-weight-bold ">@item.Name</h1>
-                        <h6 class="card-text">@item.CompanyName</h6>
-                        <h6 class="card-text">@item.DepartmentName</h6>
-                    </div>
-                    <div>
-                        @using (Html.BeginForm("GetUser", "User", FormMethod.Post, new { id = "getUserDetail", style = "display: inline-block;" }))
-                        {
-                            <input type="hidden" value="@item.Id" name="Id" />
-                            <button type="submit" class="btn btn-primary">Detay</button>
-                        }
+				<div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+					<div>
+						<h1 class="card-title font-weight-bold ">@item.Name</h1>
+						<h6 class="card-text">@item.CompanyName</h6>
+						<h6 class="card-text">@item.DepartmentName</h6>
+					</div>
+					<div>
+						@using (Html.BeginForm("GetUser", "User", FormMethod.Post, new { id = "getUserDetail", style = "display: inline-block;" }))
+						{
+							<input type="hidden" value="@item.Id" name="Id" />
+							<button type="submit" class="btn btn-primary">Detay</button>
+						}
 
-                        @using (Html.BeginForm("DeleteUser", "User", FormMethod.Post, new { id = "deleteUser", style = "display: inline-block; float:right;" }))
-                        {
-                            <input type="hidden" value="@item.Id" name="Id" />
-                            <button type="submit" class="btn btn-danger">Sil</button>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+						@using (Html.BeginForm("DeleteUser", "User", FormMethod.Post, new { id = "deleteUser", style = "display: inline-block; float:right;" }))
+						{
+							<input type="hidden" value="@item.Id" name="Id" />
+							<button type="submit" class="btn btn-danger">Sil</button>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
 </div>
 
 
@@ -89,83 +91,84 @@
 
 
 <div class="modal fade" id="modal-NewUser">
-    <div class="modal-dialog modal-NewUser">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Yeni Kişi</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            @{
+	<div class="modal-dialog modal-NewUser">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Yeni Kişi</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			@{
 
 
-                using (Html.BeginForm("AddUser", "User", FormMethod.Post, new { id = "addUserForm", enctype = "multipart/form-data" }))
-                {
-                    <div class="modal-body">
+				using (Html.BeginForm("AddUser", "User", FormMethod.Post, new { id = "addUserForm", enctype = "multipart/form-data" }))
+				{
+					<div class="modal-body">
 
-                        <div class="form-group">
-                            <label for="txtUserName_Add">Ad</label>
-                            <input name="Name" type="text" class="form-control" id="txtUserName_Add" placeholder="Ad...">
-                            <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="txtUserEmailName_Add">Email</label>
-                            <input name="Email" type="text" class="form-control" id="txtUserEmailName_Add" placeholder="Email...">
-                            <div class="invalid-feedback">E-posta alanı boş bırakılamaz.</div>
-                        </div>
+						<div class="form-group">
+							<label for="txtUserName_Add">Ad</label>
+							<input name="Name" type="text" class="form-control" id="txtUserName_Add" placeholder="Ad...">
+						</div>
+						<div class="form-group">
+							<label for="txtUserEmailName_Add">Email</label>
+							<input name="Email" type="text" class="form-control" id="txtUserEmailName_Add" placeholder="Email...">
+						</div>
 
-                        <div class="form-group">
-                            <label for="txtPhoneNumber_Add">Telefon Numarası</label>
-                            <input name="Phone" class="form-control" rows="5" id="txtPhoneNumber_Add" placeholder="0(---) --- ----">
-                            <div class="invalid-feedback">Telefon numarası alanı boş bırakılamaz.</div>
-                        </div>
+						<div class="form-group">
+							<label for="txtPhoneNumber_Add">Telefon Numarası</label>
+							<input name="Phone" class="form-control" rows="5" id="txtPhoneNumber_Add" placeholder="0(---) --- ----">
+						</div>
 
-                        <div class="form-group">
-                            <label for="txtPassword_Add">Şifre</label>
-                            <input name="Password" type="password" class="form-control" rows="5" id="txtPassword_Add" placeholder="Şifre...">
-                            <div class="invalid-feedback">Şifre alanı boş bırakılamaz.</div>
-                        </div>
+						<div class="form-group">
+							<label for="txtPassword_Add">Şifre</label>
+							<input name="Password" type="password" class="form-control" rows="5" id="txtPassword_Add" placeholder="Şifre...">
+						</div>
 
-                        <div class="form-group">
-                            <label for="txtImage_Add">Fotoğraf</label>
-                            <input name="imageFile" type="file" class="form-control" rows="5" id="txtImage_Add">
-                            <div class="invalid-feedback">Fotoğraf alanı boş bırakılamaz.</div>
-                        </div>
+						<div class="form-group">
+							<label for="txtImage_Add">Fotoğraf</label>
+							<input name="imageFile" type="file" class="form-control" rows="5" id="txtImage_Add">
+						</div>
+						@if (SessionRole.Roles.Contains("Admin"))
+						{
+							<div class="form-group">
+								<label for="ddlUserDepartment_Add">Departman</label>
+								<select name="DepartmentId" class="custom-select rounded-0" id="ddlUserDepartment_Add">
+									<option value="">Departman Seçiniz...</option>
+									@{
+										for (int i = 0; i < Model.Departments.Count; i++)
+										{
+											<option value="@Model.Departments[i].Id">@Model.Departments[i].Name / @Model.Departments[i].CompanyName</option>
 
-                        <div class="form-group">
-                            <label for="ddlUserDepartment_Add">Departman</label>
-                            <select name="DepartmentId" class="custom-select rounded-0" id="ddlUserDepartment_Add">
-                            <option value="">Departman Seçiniz...</option>
-                                @{
-                                    for (int i = 0; i < Model.Departments.Count; i++)
-                                    {
-                                        <option value="@Model.Departments[i].Id">@Model.Departments[i].Name / @Model.Departments[i].CompanyName</option>
-
-                                    }
-                                }
+										}
+									}
 
 
-                            </select>
-                            <div class="invalid-feedback">Departman alanı boş bırakılamaz.</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
-                        <button type="submit" class="btn btn-primary" id="btnAddUser">Kaydet</button>
-                    </div>
-                }
+								</select>
+							</div>
+						}
+						@if(!(SessionRole.Roles.Contains("Admin")))
+						{
+							<input hidden="hidden" name="DepartmentId" id="ddlUserDepartment_Add" value="@Accessor.HttpContext.Session.GetString("DepartmentId")" />
+						}
+
+					</div>
+					<div class="modal-footer justify-content-between">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+						<button type="submit" class="btn btn-primary" id="btnAddUser">Kaydet</button>
+					</div>
+				}
 
 
 
-            }
-        </div>
+			}
+		</div>
 
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
 </div>
 
 <script>
-    
+
 </script>

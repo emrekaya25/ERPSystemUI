@@ -87,6 +87,7 @@
                     <tbody>
                         @{
                             decimal totalSum = 0;
+                            decimal sum = 0;
                         }
                         @foreach (var item in Model.Invoices)
                         {
@@ -136,7 +137,9 @@
                                                     <td>@totalSum</td>
                                                 </tr>
 
+
                                                 @{
+                                                    sum += totalSum;
                                                     totalSum = 0;
                                                 }
                                             </table>
@@ -145,6 +148,14 @@
                                 </td>
                             </tr>
                         }
+                        <tr style="background-color:#d9ffe9;">
+                            <td colspan="7">Toplam Rapor Sayısı:</td>
+                            <td>@Model.Invoices.Count</td>
+                        </tr>
+                        <tr style="background-color:#d9ffe9;">
+                            <td colspan="7">Toplam Fiyat:</td>
+                            <td>@sum</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

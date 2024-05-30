@@ -286,6 +286,7 @@ namespace ERPSystemUI.WebUI.Controllers
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + HttpContext.Session.GetString("Token"));
 
+
             string base64String = null;
 
             // Eğer dosya gönderilmişse

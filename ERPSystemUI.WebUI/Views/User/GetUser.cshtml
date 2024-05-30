@@ -25,18 +25,20 @@
                             </button>
 
                         </div>
-
-                        <div>
-                            <div class="d-flex">
-                                <button type="button" onclick='addRoleModal("@userDTO.Id")' class="btn btn-success m-1" data-toggle="modal" data-target="#modal-RoleModal">
-                                    Rol Ekle
-                                </button>
-                                <button type="button" onclick='deleteRoleModal("@userDTO.Id")' class="btn btn-danger m-1" data-toggle="modal" data-target="#modal-deleteRoleModal">
-                                    Rol Sil
-                                </button>
-
+                        @if (SessionRole.Roles.Contains("Admin"))
+                        {
+                            <div>
+                                <div class="d-flex">
+                                    <button type="button" onclick='addRoleModal("@userDTO.Id")' class="btn btn-success m-1" data-toggle="modal" data-target="#modal-RoleModal">
+                                        Rol Ekle
+                                    </button>
+                                    <button type="button" onclick='deleteRoleModal("@userDTO.Id")' class="btn btn-danger m-1" data-toggle="modal" data-target="#modal-deleteRoleModal">
+                                        Rol Sil
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        }
+
                     </div>
                     <div class="row g-0">
                         <div class="col-md-4" style="margin-top: auto; margin-bottom: auto; padding-left: 40px;">
@@ -190,24 +192,20 @@
                             <div class="form-group">
                                 <label for="txtUserName_Update">Ad</label>
                                 <input name="Name" type="text" class="form-control" id="txtUserName_Update">
-                                <div class="invalid-feedback">Ad alanı boş bırakılamaz.</div>
                             </div>
                             <div class="form-group">
                                 <label for="txtUserEmailName_Update">Email</label>
                                 <input name="Email" type="text" class="form-control" id="txtUserEmailName_Update">
-                                <div class="invalid-feedback">Email alanı boş bırakılamaz.</div>
                             </div>
 
                             <div class="form-group">
                                 <label for="txtPhoneNumber_Update">Telefon Numarası</label>
                                 <input name="Phone" class="form-control" rows="5" id="txtPhoneNumber_Update">
-                                <div class="invalid-feedback">Telefon numarası alanı boş bırakılamaz.</div>
                             </div>
 
                             <div class="form-group">
                                 <label for="txtPassword_Update">Şifre</label>
                                 <input name="Password" type="password" class="form-control" rows="5" id="txtPassword_Update">
-                                <div class="invalid-feedback">Şifre alanı boş bırakılamaz.</div>
                             </div>
 
                             <div class="form-group">
@@ -235,7 +233,6 @@
                                         }
                                     }
                                 </select>
-                                <div class="invalid-feedback">Departman alanı boş bırakılamaz.</div>
                             </div>
 
 
