@@ -24,7 +24,7 @@ $(function () {
                 pdf.addPage(pdfWidth, pdfHeight);
                 pdf.addImage(imgData, 'JPG', topLeftMargin, -(pdfHeight * i) + (topLeftMargin * 4), canvasImageWidth, canvasImageHeight);
             }
-            pdf.save("sample-invoice.pdf");
+            pdf.save("fatura.pdf");
         });
     });
 })

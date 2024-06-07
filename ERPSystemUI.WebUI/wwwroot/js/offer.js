@@ -234,15 +234,21 @@ function openOffers(id, name, description, requestId, supplierName, price, statu
         "<td>" + price + "</td>" +
         "<td>" + statusName + "</td>" +
         "<td>" + approverUser + "</td>" +
-        "<td>" +
-        "<div class='dropdown'>" +
-        "<button class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>" +
-        "İşlemler" +
-        "</button>" +
-        "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>" +
-        `<button id='btnOfferUpdate'
-                onclick='updateOffer(${id}, "${supplierName}", "${description} ", ${price}, ${statusId}, ${approverUserId}, ${requestId})' class='btn btn-primary dropdown-item btn'>Güncelle</button>` +
-        `<button id='btnConfirmOffer' onclick='confirmOffer(
+        "<td>";
+    if (statusId == 2) {
+        newRow += "<div class='btn btn-success'> Onaylandı</div>";
+    }
+    else if (statusId == 3) {
+        newRow += "<div class='btn btn-danger'> Reddedildi</div>";
+    }
+    else {
+        newRow +="<div class='dropdown'>" +
+            "<button class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>" +
+            "İşlemler" +
+            "</button>"+ "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>" +
+            `<button id='btnOfferUpdate'
+                onclick='updateOffer(${id}, "${supplierName}", "${description} ", ${price}, ${statusId}, ${approverUserId}, ${requestId})' class='btn dropdown-item btn'>Güncelle</button>` +
+            `<button id='btnConfirmOffer' onclick='confirmOffer(
 
             "${id}",
             "${supplierName}",
@@ -253,10 +259,12 @@ function openOffers(id, name, description, requestId, supplierName, price, statu
             ${requestId}
 
                 )' class='dropdown-item btn'>Onayla</button>` +
-        `<button id='btnRejectOffer'
+            `<button id='btnRejectOffer'
                 onclick='rejectOffer(${id}, "${supplierName}", "${description}", ${price}, ${statusId}, ${approverUserId}, ${requestId})' class='dropdown-item btn'>Reddet</button>` +
-        "</div>" +
-        "</div>" +
+            "</div>";
+    }
+        
+        newRow += "</div>" +
         "</td>" +
         "</tr>";
 
